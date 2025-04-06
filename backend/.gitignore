@@ -51,7 +51,7 @@ tsconfig.json
 req.rest
 
 #csv file
-creditcard.csv
+backend/model/creditcard.csv
 
 #venv
-.venv
+backend/model/.venv
