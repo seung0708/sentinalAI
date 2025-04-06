@@ -49,3 +49,9 @@ tsconfig.json
 
 #rest client
 req.rest
+
+#csv file
+creditcard.csv
+
+#venv
+.venv
