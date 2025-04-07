@@ -45,6 +45,7 @@ interface Navbar1Props {
       url: string;
     };
   };
+  allAccess: () => void;
 }
 
 const Navbar1 = ({
@@ -124,6 +125,7 @@ const Navbar1 = ({
     login: { title: "Login", url: "/login" },
     signup: { title: "All Access", url: "#" },
   },
+  allAccess
 }: Navbar1Props) => {
   return (
     <>
@@ -143,7 +145,7 @@ const Navbar1 = ({
             <Button asChild variant="outline" size="sm">
               <a href={auth.login.url}>{auth.login.title}</a>
             </Button>
-            <Button asChild size="sm">
+            <Button onClick={allAccess} asChild size="sm">
               <a href={auth.signup.url}>{auth.signup.title}</a>
             </Button>
           </div>
