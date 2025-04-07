@@ -5,7 +5,6 @@ import Hero from "./components/Hero";
 import Solutions from "./components/Solutions";
 import Analytics from "./components/Analytics";
 import Footer from "./components/Footer";
-import Pricing from "./components/Pricing";
 
 export default function Home() {
   return (

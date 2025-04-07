@@ -11,7 +11,7 @@ const Pricing = () => {
     const [isAnnually, setIsAnnually] = useState(false);
     return (
         <section className="py-32">
-      <div className="container">
+      <div className="`">
         <div className="mx-auto flex max-w-screen-xl flex-col gap-6">
           <h2 className="text-4xl font-bold text-pretty lg:text-6xl">
             Pricing
