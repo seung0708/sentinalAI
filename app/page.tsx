@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 
 import About from "./components/About";
 import Header from "./components/Header";
@@ -11,22 +8,14 @@ import Footer from "./components/Footer";
 import Pricing from "./components/Pricing";
 
 export default function Home() {
-  const [showPricing, setShowPricing] = useState(false);
   return (
     <>
-      <Header allAccess={() => setShowPricing(true)} />
+      <Header />
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-      {showPricing ? (
-          <Pricing />
-        ) : (
-          <>
-          <Hero getStarted={() => setShowPricing(true)} />
-          <About />
-          <Solutions />
-          <Analytics />
-          </>
-        )
-      }
+        <Hero  />
+        <About />
+        <Solutions />
+        <Analytics />
       </main>
       <Footer />
     </>

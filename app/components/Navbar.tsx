@@ -24,6 +24,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Logo } from "./Logo";
+import Link from "next/link";
 
 interface MenuItem {
   title: string;
@@ -45,7 +46,6 @@ interface Navbar1Props {
       url: string;
     };
   };
-  allAccess: () => void;
 }
 
 const Navbar1 = ({
@@ -123,9 +123,8 @@ const Navbar1 = ({
   ],
   auth = {
     login: { title: "Login", url: "/login" },
-    signup: { title: "All Access", url: "#" },
-  },
-  allAccess
+    signup: { title: "All Access", url: "/pricing" },
+  }
 }: Navbar1Props) => {
   return (
     <>
@@ -145,8 +144,8 @@ const Navbar1 = ({
             <Button asChild variant="outline" size="sm">
               <a href={auth.login.url}>{auth.login.title}</a>
             </Button>
-            <Button onClick={allAccess} asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.title}</a>
+            <Button asChild size="sm">
+              <Link href={auth.signup.url}>{auth.signup.title}</Link>
             </Button>
           </div>
         </nav>
