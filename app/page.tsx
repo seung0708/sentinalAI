@@ -2,6 +2,8 @@ import About from "./components/About";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Solutions from "./components/Solutions";
+import Analytics from "./components/Analytics";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -11,9 +13,9 @@ export default function Home() {
         <Hero />
         <About />
         <Solutions />
+        <Analytics />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-      </footer>
+      <Footer />
     </>
   );
 }

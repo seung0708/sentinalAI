@@ -117,7 +117,7 @@ const Navbar1 = ({
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "#analytics",
     },
   ],
   auth = {
