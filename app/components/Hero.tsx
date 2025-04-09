@@ -8,7 +8,7 @@ const Hero = () => {
             <h1 className="text-5xl font-semibold mb-6">Detect fraud in real-time.<br /> Protect transactions with AI.</h1>
             <p className="mb-6">Seamslessly detect fraud and approves legitimate transactions faster with AI-driven risk scoring reducing and enhancing security.</p>
             <Button className="w-[256px] h-[56px] rounded-4xl" variant='outline'>
-              <Link href="/pricing">Get Started</Link>
+              <Link href="/signup">Get Started</Link>
               </Button>
         </div>     
     </section>

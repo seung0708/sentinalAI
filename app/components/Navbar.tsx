@@ -123,7 +123,7 @@ const Navbar1 = ({
   ],
   auth = {
     login: { title: "Login", url: "/login" },
-    signup: { title: "All Access", url: "/pricing" },
+    signup: { title: "Sign up", url: "/signup" },
   }
 }: Navbar1Props) => {
   return (
