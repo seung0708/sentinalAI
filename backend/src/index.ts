@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors())
-app.use(bodyParser.json())
+app.use(express.json())
 
 app.use('/users', userRouter)
 
@@ -23,4 +23,10 @@ app.get('/', (req: Request, res: Response) => {
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-});
+}).on('error', (err) => {
+    if (err.message === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Try a different port.`);
+    } else {
+      console.error('Server failed to start:', err);
+    }
+  });

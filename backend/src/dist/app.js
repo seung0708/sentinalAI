@@ -16,6 +16,7 @@ app.use(express_1.default.json());
 app.get('/', (req, res) => {
     res.send("Server is live");
 });
+console.log("PORT from .env", process.env.PORT);
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
