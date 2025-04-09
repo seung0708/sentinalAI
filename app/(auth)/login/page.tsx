@@ -35,7 +35,7 @@ const LoginPage = () => {
                             </div>
                             <div className="flex flex-col gap-4">
                                 <Button type="submit" className="mt-2 w-full">
-                                    Create an account
+                                    Login
                                 </Button>
                             </div>
                         </div>
