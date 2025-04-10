@@ -2,7 +2,7 @@ import Image from "next/image"
 
 const About = () => {
   return (
-    <section id="about" className="w-full flex justify-around items-center">
+    <section id="about" className="flex justify-around items-center">
         <div>
             <Image 
              src="/fake.png"
@@ -12,7 +12,7 @@ const About = () => {
             />
         </div>
         <div className="text-center">
-            <h2 className="text-4xl mb-8">About Us</h2>
+            <h2 className="md:text-3xl lg:text-4xl mb-8">About Us</h2>
             <p className="w-[602px]">
                 Our AI-powered fraud detection platform helps fintech companies identify and prevent fraudulent transactions in real time. 
                 <br />
