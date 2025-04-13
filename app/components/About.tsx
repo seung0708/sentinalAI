@@ -13,7 +13,7 @@ const About = () => {
         </div>
         <div className="text-center">
             <h2 className="text-xl sm:text-3xl md:text-4xl mb-4 md:mb-8">About Us</h2>
-            <p className="max-w-3xl text-base md:text-lg md:text-xl">
+            <p className="max-w-3xl text-base sm:text-lg md:text-xl">
                 Our AI-powered fraud detection platform helps fintech companies identify and prevent fraudulent transactions in real time. 
                 <br />
                 Using advanced machine learning, real-time analytics, and behavioral risk scoring, we empower businesses to minimize losses, reduce chargebacks, and enhance transaction security—all while maintaining a seamless user experience.

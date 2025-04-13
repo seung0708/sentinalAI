@@ -1,6 +1,6 @@
 const Analytics = () => {
     return (
-        <section id="analytics" className="w-full">
+        <section id="analytics" className="w-full mt-6">
             <h2 className="text-center text-4xl">Analytics</h2>
             <img
                 src="https://shadcnblocks.com/images/block/placeholder-1.svg"
