@@ -12,7 +12,7 @@ const About = () => {
             />
         </div>
         <div className="text-center">
-            <h2 className="text-xl sm:text-3xl md:text-4xl mb-4 md:mb-8">About Us</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl mb-4 md:mb-8">About Us</h2>
             <p className="max-w-3xl text-base sm:text-lg md:text-xl">
                 Our AI-powered fraud detection platform helps fintech companies identify and prevent fraudulent transactions in real time. 
                 <br />

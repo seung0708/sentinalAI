@@ -32,7 +32,7 @@ const Solutions = () => {
                             />
                         </div>
                         <div className="flex flex-col justify-center px-6 py-8 md:px-8 md:py-10 lg:px-10 lg:py-12">
-                            <h3 className="mb-3 text-3xl md:mb-4 md:text-2xl lg:mb-6">
+                            <h3 className="mb-3 text-xl md:mb-4 md:text-2xl lg:mb-6">
                                 Automated Incident Reports
                             </h3>
                             <p className="lg:text-lg">
@@ -42,7 +42,7 @@ const Solutions = () => {
                     </div>
                     <div className="flex flex-col text-center overflow-clip rounded-xl md:col-span-2 md:grid md:grid-cols-2 md:gap-6 lg:gap-8">
                         <div className="flex flex-col justify-center px-6 py-8 md:px-8 md:py-10 lg:px-10 lg:py-12">
-                            <h3 className="mb-3 text-3xl md:mb-4 md:text-2xl lg:mb-6">
+                            <h3 className="mb-3 text-xl md:mb-4 md:text-2xl lg:mb-6">
                                 Advanced Analytics and Reporting
                             </h3>
                             <p className="lg:text-lg">
