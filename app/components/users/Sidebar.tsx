@@ -12,7 +12,7 @@ import { NavMain } from "./NavMain"
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="offcanvas" >
+        <Sidebar collapsible="offcanvas" className="bg-[#2E4430]">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
