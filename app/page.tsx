@@ -1,10 +1,10 @@
 
-import About from "./components/About";
-import Header from "./components/Header";
-import Hero from "./components/Hero";
-import Solutions from "./components/Solutions";
-import Analytics from "./components/Analytics";
-import Footer from "./components/Footer";
+import About from "./components/landing/About";
+import Header from "./components/landing/Header";
+import Hero from "./components/landing/Hero";
+import Solutions from "./components/landing/Solutions";
+import Analytics from "./components/landing/Analytics";
+import Footer from "./components/landing/Footer";
 
 export default function Home() {
   return (

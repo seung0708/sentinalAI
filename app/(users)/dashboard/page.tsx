@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/app/components/Sidebar";
+import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function Dashboard() {

@@ -8,6 +8,7 @@ import {
     SidebarMenuItem,
   } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { NavMain } from "./NavMain"
 
 export function AppSidebar() {
     return (
@@ -23,7 +24,18 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent></SidebarContent>
+            <SidebarContent>
+                <NavMain />
+            </SidebarContent>
+            <SidebarFooter>
+                <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        <Link href="/settings">
+                            <span>Settings</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarFooter>
         </Sidebar>
     )
 }
