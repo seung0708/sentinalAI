@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useState, useEffect, useContext, createContext } from 'react';
 
 interface User {
@@ -58,6 +60,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             user, 
             signin
         }} >
+            {children}
         </AuthContext.Provider>
     )
 }
