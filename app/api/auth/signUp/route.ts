@@ -17,7 +17,7 @@ export async function POST(req: NextRequest){
         type Newuser = Database['public']['Tables']['users']["Insert"] & {auth_id: string}
     
         const newUser: Newuser = {
-            name:name,
+            company: company,
             email:email,
             auth_id: authData.user?.id ?? '' // optional chaining - checks if authData.user.id is not null if valid then acces it. if invalid then set empty string
         }
