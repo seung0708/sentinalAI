@@ -1,3 +1,4 @@
+import SignUpForm from "@/app/components/landing/signup-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,46 +14,11 @@ const SignUpPage = () => {
                         <h1 className="text-4xl font-semibold">Signup</h1>
                         <p className="text-sm">Create an account</p>
                     </div>
-                    <div className="flex w-full flex-col gap-8">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col gap-4">
-                                <Label>Company: </Label>
-                                <Input
-                                    type="text"
-                                    placeholder="Company"
-                                    required
-                                    className="bg-white"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label>Email: </Label>
-                                <Input
-                                type="email"
-                                placeholder="Email"
-                                required
-                                className="bg-white"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label>Password: </Label>
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    required
-                                    className="bg-white"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-4">
-                                <Button type="submit" className="mt-2 w-full">
-                                    Create an account
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                    <SignUpForm />
                     <div className="flex justify-center gap-1 text-sm">
                         <p>Already have an account?</p>
-                        <Link href="/login" className="font-medium hover:underline">
-                            Login
+                        <Link href="/signup" className="font-medium hover:underline">
+                            Sign Up
                         </Link>
                     </div>
                 </div>
