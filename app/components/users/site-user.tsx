@@ -55,29 +55,22 @@ export function SiteUser() {
 
   return (
     <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          <DropdownMenuTrigger asChild >
+            <Button
+              variant="link"
+              className="w-0 h-0 no-underline hover:no-underline cursor-pointer"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-9 w-9 rounded-lg">
                 <AvatarImage src='' alt='' />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium"></span>
-                <span className="truncate text-xs text-muted-foreground">
-                  
-                </span>
-              </div>
-              <MoreVerticalIcon className="ml-auto size-4" />
-            </SidebarMenuButton>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? "right" : "bottom"}
             align="end"
-            sideOffset={4}
+            sideOffset={13}
           >
             <DropdownMenuGroup>
               <DropdownMenuItem>
