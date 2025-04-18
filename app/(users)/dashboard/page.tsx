@@ -2,9 +2,6 @@ import { Chart } from "@/app/components/users/Chart";
 import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
-import {SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
-import data from './data.json'
 import { SiteHeader } from "@/app/components/users/site-header";
 
 export default function Dashboard() {
@@ -16,7 +13,7 @@ export default function Dashboard() {
                 <div className="px-4 lg:px-6">
                     <Chart />
                 </div>
-                <DataTable data={data} />
+                
             </div>
         </div>
     </div>

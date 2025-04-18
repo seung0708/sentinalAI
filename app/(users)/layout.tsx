@@ -8,12 +8,12 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
         <div>
             <main>
             <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <SiteHeader />
-                {children}
-            </SidebarInset>
-        </SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                    <SiteHeader />
+                    {children}
+                </SidebarInset>
+            </SidebarProvider>
             </main>
         </div>
     )
