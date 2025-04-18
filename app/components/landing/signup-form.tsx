@@ -96,7 +96,7 @@ export default function SignUpForm() {
                     </div>
                     <div className="flex flex-col gap-4">
                         <Button type="submit" className="mt-2 w-full">
-                            Sign in
+                            Sign up
                         </Button>
                     </div>
                 </div>

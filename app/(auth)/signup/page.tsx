@@ -17,8 +17,8 @@ const SignUpPage = () => {
                     <SignUpForm />
                     <div className="flex justify-center gap-1 text-sm">
                         <p>Already have an account?</p>
-                        <Link href="/signup" className="font-medium hover:underline">
-                            Sign Up
+                        <Link href="/signin" className="font-medium hover:underline">
+                            Sign in
                         </Link>
                     </div>
                 </div>
