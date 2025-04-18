@@ -1,5 +1,7 @@
 "use client"
 
+import { redirect } from "next/navigation";
+
 import {useForm} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod"
@@ -36,12 +38,11 @@ export default function SignUpForm() {
                 },
                 body: JSON.stringify(data)
             });
+
             if(!response.ok) {
                 throw new Error ('Failed to Sign in')
             }
-
-            const result = response.json();
-            console.log(result)
+        
 
         } catch (error) {
             console.error(error)

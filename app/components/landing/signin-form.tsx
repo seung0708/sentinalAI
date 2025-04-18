@@ -10,6 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 
 import Link from "next/link"
 
+import { useRouter } from "next/navigation";
+
 
 const formSchema = z.object({
     email: z.string().email('Not a valid email address'),
@@ -19,6 +21,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignInForm() {
+    const router = useRouter();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema), 
@@ -41,8 +44,7 @@ export default function SignInForm() {
                 throw new Error ('Failed to Sign in')
             }
 
-            const result = response.json();
-            console.log(result)
+            router.push('/dashboard')
 
         } catch (error) {
             console.error(error)

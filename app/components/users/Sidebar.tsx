@@ -27,15 +27,6 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain />
             </SidebarContent>
-            <SidebarFooter>
-                <SidebarMenuItem>
-                    <SidebarMenuButton>
-                        <Link href="/settings">
-                            <span>Settings</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarFooter>
         </Sidebar>
     )
 }
