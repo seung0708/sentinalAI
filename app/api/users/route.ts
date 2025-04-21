@@ -1,11 +1,29 @@
-import {supabase} from '@/app/api/lib/supabaseClient'
+import { createClient } from '@/utils/supabase/server';
 import {Database} from '@/app/api/types/supabase'
+import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 
 export async function GET(request: Request){
-    const {data,error} = await supabase.from('users').select();
+    const supabase = await createClient();
+    const { data: {user}} = await supabase.auth.getUser();
+    let response;
+
+    if (user) {
+        response = NextResponse.json({
+            user,
+            status: 200
+        });
+    } else {
+        redirect('/')
+    }
     
-    return new Response(JSON.stringify(data),{
-        status:200,
-        headers: { "Content-Type": "application/json"}
-    });
+    if(!user) {
+        response = NextResponse.json({
+            status: 400, 
+            error: 'No user found'
+        })
+    }
+
+    return response; 
+   
 }
