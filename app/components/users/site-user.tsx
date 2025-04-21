@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 
 
@@ -75,7 +76,7 @@ export function SiteUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <UserCircleIcon />
-                Account
+                <Link href='/account'>Account</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />
