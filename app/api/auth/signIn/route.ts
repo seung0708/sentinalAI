@@ -15,15 +15,14 @@ export async function POST(req: NextRequest){
         });
         console.log(authData, dbError)
         if(dbError){
-            return NextResponse.json({dbError: "Incorrect email or password"},{
-                status: 400,
-                headers: {'Content-Type':'application/json'}
+            return NextResponse.json({
+                dbError: "Incorrect email or password",
+                status: 400
             })
         }
 
-        return NextResponse.json({message: "Signed In Succesfully"},{
-            status: 200,
-            headers: {'Content-type':'application/json'}
+        return NextResponse.json({
+            status: 200
         })
 
     }catch(error){

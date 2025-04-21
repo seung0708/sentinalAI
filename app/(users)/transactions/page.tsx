@@ -4,6 +4,8 @@ import data from '@/app/(users)/dashboard/data.json'
 
 export default function Transactions() {
     return (
-        <DataTable data={data} />
+        <DataTable 
+            data={data} 
+        />
     )
 }

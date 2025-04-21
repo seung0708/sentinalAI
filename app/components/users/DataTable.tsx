@@ -390,7 +390,7 @@ function DragHandle({ id }: { id: number }) {
     return (
       <Tabs
         defaultValue="outline"
-        className="flex w-full flex-col justify-start gap-6"
+        className="flex w-full flex-col justify-start gap-6 mt-4"
       >
         <div className="flex items-center justify-between px-4 lg:px-6">
           <Label htmlFor="view-selector" className="sr-only">
@@ -634,6 +634,7 @@ function DragHandle({ id }: { id: number }) {
       color: "var(--primary)",
     },
   } satisfies ChartConfig
+
   function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     const isMobile = useIsMobile()
     return (

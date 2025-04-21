@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 
-import Link from "next/link"
-
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 
 const formSchema = z.object({
@@ -21,6 +20,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignInForm() {
+    const [error, setError] = useState('');
     const router = useRouter();
 
     const form = useForm<FormData>({
@@ -41,10 +41,15 @@ export default function SignInForm() {
                 body: JSON.stringify(data)
             });
             if(!response.ok) {
-                throw new Error ('Failed to Sign in')
+                throw new Error ('Failed to login')
             }
 
-            router.push('/dashboard')
+            const result = await response.json();
+            if(result.status === 200) {
+                router.push('/dashboard')
+            } else if (result.status === 400) {
+                setError(result.dbError)
+            }
 
         } catch (error) {
             console.error(error)
@@ -83,6 +88,7 @@ export default function SignInForm() {
                             )}
                         />
                     </div>
+                    {error && (<span className="text-red-500">{error}</span>)}
                     <div className="flex flex-col gap-4">
                         <Button type="submit" className="mt-2 w-full">
                             Sign in
