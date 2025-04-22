@@ -76,7 +76,7 @@ export function SiteUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <UserCircleIcon />
-                <Link href='/account'>Account</Link>
+                <Link href='/settings'>Account</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />

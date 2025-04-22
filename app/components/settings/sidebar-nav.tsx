@@ -6,9 +6,14 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
+interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
+  items: {
+    href: string
+    title: string
+  }[]
+}
 
-
-export function SidebarNav() {
+export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
   const pathname = usePathname()
 
   return (
@@ -19,9 +24,6 @@ export function SidebarNav() {
       )}
       {...props}
     >
-      <Link 
-      href>
-      </Link>
       {items.map((item) => (
         <Link
           key={item.href}
