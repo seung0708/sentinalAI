@@ -5,24 +5,20 @@ import { SidebarNav } from "../components/settings/sidebar-nav"
 
 const sidebarNavItems = [
   {
-    title: "Profile",
-    href: "/examples/forms",
-  },
-  {
     title: "Account",
-    href: "/examples/forms/account",
-  },
-  {
-    title: "Appearance",
-    href: "/examples/forms/appearance",
+    href: "/settings",
   },
   {
     title: "Notifications",
-    href: "/examples/forms/notifications",
+    href: "/settings/notifications",
   },
   {
-    title: "Display",
-    href: "/examples/forms/display",
+    title: "Team Members", 
+    href: "/settings/members"
+  },
+  {
+    title: "Security",
+    href: "/settings/security",
   },
 ]
 
@@ -57,7 +53,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           </p>
         </div>
         <Separator className="my-6" />
-        <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+        <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-5 lg:space-y-0">
           <aside className="-mx-4 lg:w-1/5">
             <SidebarNav items={sidebarNavItems} />
           </aside>
