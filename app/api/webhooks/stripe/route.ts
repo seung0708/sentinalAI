@@ -15,16 +15,28 @@ export async function POST(req: NextRequest){
     }catch (error){
         console.error("Webhook signature verification failed", error)
         return NextResponse.json({message:"Webhook error"},{
-            status: 400,
-            headers: {'Content-Type':'application/json'}
-        })
+            status: 400 })
     }
+
+   
 
     // handle Stripe Event
 
     switch(event.type){
+        
         case 'payment_intent.succeeded':
-            const paymentIntent = event.data.object
+            const paymentIntent = event.data.object as Stripe.PaymentIntent 
+
+            const transactionData = {
+                stripe_id : paymentIntent.id,
+                amount : paymentIntent.amount,
+                currency : paymentIntent.currency,
+                created : new Date(paymentIntent.created * 1000).toString(),
+                payment_method : paymentIntent.payment_method,
+                metadata: paymentIntent.metadata
+            }
+
+
             console.log('Payment Intent was succesful', paymentIntent)
             break
 
