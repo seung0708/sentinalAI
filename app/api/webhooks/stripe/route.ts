@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from 'stripe'
 import {stripe} from '@/app/api/lib/stripe'
+import { supabase } from "../../lib/supabaseClient";
 
 export async function POST(req: NextRequest){
 
@@ -33,9 +34,13 @@ export async function POST(req: NextRequest){
                 currency : paymentIntent.currency,
                 created : new Date(paymentIntent.created * 1000).toString(),
                 payment_method : paymentIntent.payment_method,
+                customer_email: paymentIntent.receipt_email,
+                location: paymentIntent.shipping?.address?.city,
+                status: paymentIntent.status,
+                name: paymentIntent.shipping?.name,
                 metadata: paymentIntent.metadata
             }
-
+            await supabase.from('transactions').insert([transactionData]);
 
             console.log('Payment Intent was succesful', paymentIntent)
             break
