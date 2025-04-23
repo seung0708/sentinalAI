@@ -74,10 +74,12 @@ export function SiteUser() {
             sideOffset={13}
           >
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
-                <Link href='/settings'>Account</Link>
-              </DropdownMenuItem>
+              <Link href='/settings'>
+                <DropdownMenuItem>
+                  <UserCircleIcon />
+                  Account
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem>
                 <CreditCardIcon />
                 Billing
