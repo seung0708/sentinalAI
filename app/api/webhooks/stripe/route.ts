@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from 'stripe'
 import {stripe} from '@/app/api/lib/stripe'
-import { supabase } from "../../lib/supabaseClient";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest){
+    const supabase = await createClient();
 
     const rawBody = await req.text();
     const sig = req.headers.get('stripe-signature') as string
