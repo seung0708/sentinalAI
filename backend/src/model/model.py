@@ -9,15 +9,23 @@ from xgboost import XGBClassifier
 
 
 #load dataset from file
-df = pd.read_csv("creditcard.csv")
+df = pd.read_csv("../../sample_transactions.csv")
 
+# print(df.head())
+# print(df['is_fraud'].value_counts())
+
+# encode categorical features
+df = pd.get_dummies(df, columns=['payment_method', 'merchant_category', 'fraud_reason'], drop_first=True)
+
+#splitting data
+X = df.drop('is_fraud', axis=1) # all columns except Class which contains fraud values
+y = df['is_fraud'] # Class columns which contains fraud values
+
+#Scale features
 scaler = StandardScaler()
 df_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
 
-#splitting data
-X = df.drop('Class', axis=1) # all columns except Class which contains fraud values
-y = df['Class'] # Class columns which contains fraud values
-
+# Split data into test and training samples
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
 # Applying SMOTE on training data
