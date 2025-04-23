@@ -1,0 +1,8 @@
+POST http://localhost:3000/api/auth/signUp
+Content-Type: application/json
+
+{
+    "name":"SentinalAi Inc",
+    "email":"SentAI@gmail.com",
+    "password":"Sentpass123"
+}
