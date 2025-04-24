@@ -1,5 +1,14 @@
 import pandas as pd
 import joblib
+import matplotlib.plylot as plt 
+from sklearn.metric import (
+    confusion_matrix,
+    ConfusionMatrixDisplay, 
+    roc_curve,
+    roc_auc_score,
+    precision_recall_curve,
+    average_precision_score
+)
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split,RandomizedSearchCV 
 from sklearn.ensemble import RandomForestClassifier
@@ -9,21 +18,29 @@ from xgboost import XGBClassifier
 
 
 #load dataset from file
-df = pd.read_csv("../../sample_transactions.csv")
+df = pd.read_csv("/Users/magsz/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions.csv")
 
 # print(df.head())
 # print(df['is_fraud'].value_counts())
 
-# encode categorical features
-df = pd.get_dummies(df, columns=['payment_method', 'merchant_category', 'fraud_reason'], drop_first=True)
+# encode categorical columns - 
+# converting columns that contain strings into numeerical inputs for the model to read
+df = pd.get_dummies(df, columns=['payment_method', 'currency', 'fraud_reason'], drop_first=True)
+
+
+# drop non-numeric and irrelevant columns
+columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
+features_to_scale = df.drop(columns=columns_to_drop)
+
 
 #splitting data
-X = df.drop('is_fraud', axis=1) # all columns except Class which contains fraud values
+X = df.drop(['is_fraud','stripe_id', 'user_id', 'created'], axis=1) # all columns that do not contain numeric values
 y = df['is_fraud'] # Class columns which contains fraud values
 
 #Scale features
 scaler = StandardScaler()
-df_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+scaled_array = scaler.fit_transform(features_to_scale)
+df_scaled = pd.DataFrame(scaled_array, columns=features_to_scale.columns)
 
 # Split data into test and training samples
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
@@ -43,7 +60,7 @@ param_dist = {
     'learning_rate': [0.01, 0.1, 0.2],
     'subsample': [0.8, 1.0],
     'colsample_bytree': [0.8, 1.0],
-    'scale_pos_weight': [1, 20, 30, 40]
+    'scale_pos_weight': [10]
 }
 
 xgb = XGBClassifier( eval_metric='logloss', random_state=42)
@@ -72,6 +89,9 @@ final_model.fit(X_train_resampled, y_train_resampled)
 y_pred_proba = final_model.predict_proba(X_test)[:, 1]
 y_pred = (y_pred_proba > 0.3).astype(int)
 print(classification_report(y_test, y_pred))
+
+#1.CONFUSION MATRIX
+
 
 # joblib.dump(model, 'fraud_model_smote.pkl')
 joblib.dump(final_model, 'xgboost_fraud_model_optimized.pkl')

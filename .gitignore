@@ -44,4 +44,7 @@ next-env.d.ts
 venv 
 
 #csv files
-.csv*
+*.csv
+
+#pkl
+*.pkl
