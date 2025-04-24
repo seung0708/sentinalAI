@@ -1,28 +1,43 @@
-import { Chart } from "@/app/components/users/Chart";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+import { Chart } from "@/app/components/users/chart";
 import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SiteHeader } from "@/app/components/users/site-header";
 
-import data from './data.json'
 
 export default function Dashboard() {
+    const router = useRouter()
+
+    useEffect(() => {
+        const getUser = async () => {
+            const response = await fetch('/api/user')
+            const result = await response.json()
+
+            if(!result.user) {
+                router.push('/login');
+            }
+        }
+        getUser()
+    }, [])
+
+    
+
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <div className="flex flex-1 flex-col">
-                    <div className="@container/main flex flex-1 flex-col gap-2">
-                        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                            <SectionCards />
-                            <div className="px-4 lg:px-6">
-                                <Chart />
-                            </div>
-                            <DataTable data={data} />
-                        </div>
-                    </div>
+        <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                <SectionCards />
+                <div className="px-4 lg:px-6">
+                    <Chart />
                 </div>
-            </SidebarInset>
-        </SidebarProvider>
+                
+            </div>
+        </div>
+    </div>
     )
 }
