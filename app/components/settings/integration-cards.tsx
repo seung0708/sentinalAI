@@ -1,16 +1,28 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import {useState} from "react";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const StripeCard = () => {
-    const [isConnected, setIsConnected] = useState(false)
+  const router = useRouter();
+  const [isConnected, setIsConnected] = useState(false)
 
     const handleConnectStripe = async () => {
         try {
+            const response = await fetch("/api/stripe/onboard", {
+              method:'POST', 
+              headers: {
+                "Content-Type": "application/json"
+              }
+            })
+
+            const {accountLink} = await response.json();
+            if(accountLink) {
+              router.push(accountLink.url)
+            }
             
         } catch (error) {
 
