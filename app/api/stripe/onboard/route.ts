@@ -4,15 +4,33 @@ import { stripe } from "../../lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest, res: NextResponse) {
-    console.log('hitting post request')
-    try {
+    let accountId;
+    const supabase = await createClient();
+    const {data: {user}, error} = await supabase.auth.getUser();
 
-        const account = await stripe.accounts.create({
-            type: 'standard'
-        });
+    const {data: accountDb, error: accountIdError} = await supabase.from("connected_accounts").select("*").eq("user_id", user?.id).single();
+    accountId = accountDb?.user_id;
+
+    try {
+        
+
+        if (!accountId) {
+            const account = await stripe.accounts.create({
+                type: 'standard'
+            });
+            accountId = account.id
+
+            const {error} = await supabase.from("connected_accounts").insert({
+                user_id: user?.id, 
+                provider: "stripe", 
+                account_id: accountId
+            })
+
+            console.log(error)
+        }
 
         const accountLink = await stripe.accountLinks.create({
-            account: account.id, 
+            account: accountId, 
             refresh_url: 'http://localhost:3000/settings/integrations', 
             return_url: 'http://localhost:3000/settings/integrations',
             type: "account_onboarding"
