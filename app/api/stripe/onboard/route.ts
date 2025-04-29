@@ -8,8 +8,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const supabase = await createClient();
     const {data: {user}, error} = await supabase.auth.getUser();
 
-    const {data: accountDb, error: accountIdError} = await supabase.from("connected_accounts").select("*").eq("user_id", user?.id).single();
-    accountId = accountDb?.user_id;
+    const {data: connectedAccount, error: accountIdError} = await supabase.from("connected_accounts").select("*").eq("user_id", user?.id).single();
+    accountId = connectedAccount?.account_id; 
 
     try {
         
@@ -26,8 +26,9 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 account_id: accountId
             })
 
-            console.log(error)
         }
+
+        console.log('accountId', accountId)
 
         const accountLink = await stripe.accountLinks.create({
             account: accountId, 

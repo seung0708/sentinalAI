@@ -22,7 +22,7 @@ export const StripeCard = () => {
             const {accountLink} = await response.json();
             console.log(accountLink)
             if(accountLink) {
-              router.push(accountLink.url)
+              window.location.href = accountLink.url;
             }
             
         } catch (error) {
