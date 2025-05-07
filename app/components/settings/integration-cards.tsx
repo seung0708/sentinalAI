@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export const StripeCard = () => {
   const router = useRouter();
   const [isConnected, setIsConnected] = useState(false)
+  const [currentlyDue, setCurrentlyDue] = useState<string[]>([])
+  const [pastDue, setPastDue] = useState<any[]>([])
+  const [disabledReason, setDisabledReason] = useState(null)
+  const [chargesEnabled, setChargesEnabled] = useState(false); 
+  const [payoutsEnabled, setPayoutsEnabled] = useState(false)
+
+  useEffect(() => {
+    const fetchStripeAccount = async () => {
+      const response = await fetch("/api/stripe/status");
+      const {currently_due, past_due, disabled_reason, charges_enabled, payouts_enabled} = await response.json();
+      
+      console.log(currently_due, past_due, disabled_reason, charges_enabled, payouts_enabled)
+
+      if(currently_due.length === 0 && past_due.length === 0 && !disabled_reason && charges_enabled && payouts_enabled) {
+        setIsConnected(!isConnected)
+      } else {
+        setCurrentlyDue(prev => [...prev, ...currently_due])
+        setPastDue(prev => [...prev, past_due]);
+        setDisabledReason(disabledReason);
+        
+      }
+
+    }
+
+    fetchStripeAccount()
+  },[])
 
     const handleConnectStripe = async () => {
         try {
