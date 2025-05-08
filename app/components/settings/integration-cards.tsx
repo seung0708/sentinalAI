@@ -28,7 +28,7 @@ export const StripeCard = () => {
         setCurrentlyDue(prev => [...prev, ...currently_due])
         setPastDue(prev => [...prev, past_due]);
         setDisabledReason(disabledReason);
-        
+        setIsConnected(isConnected)
       }
 
     }
