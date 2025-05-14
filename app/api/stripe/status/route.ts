@@ -14,13 +14,35 @@ export async function GET(req: NextRequest, res: NextResponse) {
         })
     }
 
+
     const {data: account, error: accountError} = await supabase.from("connected_accounts").select("account_id").eq("user_id", user.id).single();
 
     if (accountError || !account?.account_id) {
         return NextResponse.json({ error: 'Stripe account not found' }, { status: 404 });
     }
 
-    console.log(account);
+    const accountId = account.account_id
+
+    // test transaction to stripe connect account
+    const test_charge = await stripe.charges.create(
+        {
+            amount:45000,
+            currency: "usd",
+            source: "tok_visa",
+            description: "Test payment for fraud detection"
+        },
+        {
+            stripeAccount: accountId 
+        }
+    )
+
+    // getting list of transactions from stripe connect account
+    const transactions = await stripe.charges.list(
+        {limit: 3},
+        {stripeAccount: accountId}
+    )
+    
+    console.log(account, transactions);
     
     try {
         const stripeAccount = await stripe.accounts.retrieve(account.account_id);
