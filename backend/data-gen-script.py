@@ -3,6 +3,12 @@ import uuid
 import csv
 from datetime import datetime, timedelta
 
+
+## fraud charges examples
+## Charge frequency - how many tranasctions done in a short amount of time. ex: 4 transactions in 10 min span
+## failed transactions leading up to succesfull transactions 
+## 
+
 #configuration 
 NUM_ROWS = 50000 # 
 FRAUD_RATE = 0.05
@@ -25,7 +31,7 @@ def generate_transaction(fraud=False):
     fraud_reason = random.choice(FRAUD_REASONS) if fraud else None 
 
     return {
-         "stripe_id": txn_id,
+        "stripe_id": txn_id,
         "amount": amount,
         "currency": currency,
         "created": created.isoformat(),
