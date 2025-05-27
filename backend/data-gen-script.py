@@ -24,7 +24,7 @@ def generate_transaction(fraud=False):
     is_fraud = int(fraud)
     fraud_reason = random.choice(FRAUD_REASONS) if fraud else None 
 
-    return {
+    return { 
          "stripe_id": txn_id,
         "amount": amount,
         "currency": currency,

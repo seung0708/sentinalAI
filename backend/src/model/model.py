@@ -1,7 +1,7 @@
 import pandas as pd
 import joblib
-import matplotlib.plylot as plt 
-from sklearn.metric import (
+import matplotlib.pyplot as plt 
+from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay, 
     roc_curve,
@@ -16,12 +16,19 @@ from sklearn.metrics import accuracy_score, classification_report
 from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
+'''
+    Supervised Learning 
+        Classification problem
+'''
 
-#load dataset from file
-df = pd.read_csv("/Users/magsz/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions.csv")
 
-# print(df.head())
-# print(df['is_fraud'].value_counts())
+#create DataFrame from csv
+df = pd.read_csv("C:/Users/SeungHyun/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions.csv")
+
+#previews the first n rows of df, default rows is 5
+print(df.head())
+#getting the count of all transactions that are fraud
+print(df['is_fraud'].value_counts())
 
 # encode categorical columns - 
 # converting columns that contain strings into numeerical inputs for the model to read
