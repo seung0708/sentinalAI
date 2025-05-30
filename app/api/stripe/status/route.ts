@@ -1,6 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../../lib/stripe";
-import { generatePaymentIntents } from "../../lib/test-transactions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest, res: NextResponse) {
@@ -24,19 +23,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const accountId = account.account_id
 
-    // // test transaction to stripe connect account
-    // const test_charge = await stripe.charges.create(
-    //     {
-    //         amount:45000,
-    //         currency: "usd",
-    //         source: "tok_visa",
-    //         description: "Test payment for fraud detection"
-    //     },
-    //     {
-    //         stripeAccount: accountId 
-    //     }
-    // )
-    const payments = await generatePaymentIntents(accountId, 5);
 
     // getting list of transactions from stripe connect account
     const transactions = await stripe.paymentIntents.list(
@@ -44,7 +30,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
         {stripeAccount: accountId}
     )
     
-    console.log(account, transactions);
+    console.log(accountId, transactions);
     
     try {
         const stripeAccount = await stripe.accounts.retrieve(account.account_id);
