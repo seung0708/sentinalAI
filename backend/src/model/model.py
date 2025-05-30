@@ -23,10 +23,11 @@ from xgboost import XGBClassifier
 
 
 #create DataFrame from csv
-df = pd.read_csv("C:/Users/SeungHyun/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions.csv")
+df = pd.read_csv("D:\programming\projects\sentinel-ai\\backend\sample_transactions.csv")
 
 #previews the first n rows of df, default rows is 5
-print(df.head())
+#print(df.head(10))
+#print(df.info())
 #getting the count of all transactions that are fraud
 print(df['is_fraud'].value_counts())
 
@@ -37,6 +38,7 @@ df = pd.get_dummies(df, columns=['payment_method', 'currency', 'fraud_reason'], 
 
 # drop non-numeric and irrelevant columns
 columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
+#print(columns_to_drop)
 features_to_scale = df.drop(columns=columns_to_drop)
 
 
@@ -61,44 +63,44 @@ X_sample,_,y_sample,_ = train_test_split(X_train_resampled, y_train_resampled, t
 
 
 # hyperparameter grid for xboost
-param_dist = {
-    'n_estimators': [50, 100],
-    'max_depth': [3, 6, 10],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'subsample': [0.8, 1.0],
-    'colsample_bytree': [0.8, 1.0],
-    'scale_pos_weight': [10]
-}
+# param_dist = {
+#     'n_estimators': [50, 100],
+#     'max_depth': [3, 6, 10],
+#     'learning_rate': [0.01, 0.1, 0.2],
+#     'subsample': [0.8, 1.0],
+#     'colsample_bytree': [0.8, 1.0],
+#     'scale_pos_weight': [10]
+# }
 
-xgb = XGBClassifier( eval_metric='logloss', random_state=42)
-random_search = RandomizedSearchCV(
-    XGBClassifier(random_state=42), 
-    param_distributions=param_dist, 
-    n_iter=5, 
-    scoring='recall',
-    refit= True, 
-    verbose = 1, 
-    n_jobs= 1, 
-    cv=2
-    )
+# xgb = XGBClassifier( eval_metric='logloss', random_state=42)
+# random_search = RandomizedSearchCV(
+#     XGBClassifier(random_state=42), 
+#     param_distributions=param_dist, 
+#     n_iter=5, 
+#     scoring='recall',
+#     refit= True, 
+#     verbose = 1, 
+#     n_jobs= 1, 
+#     cv=2
+#     )
 
 #fit model for grid search
-random_search.fit(X_sample, y_sample)
+#random_search.fit(X_sample, y_sample)
 
 #print best parameter after tuning
-print("Best parameters:", random_search.best_params_)
+#print("Best parameters:", random_search.best_params_)
 
 #Retrain final model on full resampled data
-final_model = XGBClassifier(**random_search.best_params_, eval_metric='logloss', random_state=42)
-final_model.fit(X_train_resampled, y_train_resampled)
+#final_model = XGBClassifier(**random_search.best_params_, eval_metric='logloss', random_state=42)
+#final_model.fit(X_train_resampled, y_train_resampled)
 
 # print classification
-y_pred_proba = final_model.predict_proba(X_test)[:, 1]
-y_pred = (y_pred_proba > 0.3).astype(int)
-print(classification_report(y_test, y_pred))
+#y_pred_proba = final_model.predict_proba(X_test)[:, 1]
+#y_pred = (y_pred_proba > 0.3).astype(int)
+#print(classification_report(y_test, y_pred))
 
 #1.CONFUSION MATRIX
 
 
 # joblib.dump(model, 'fraud_model_smote.pkl')
-joblib.dump(final_model, 'xgboost_fraud_model_optimized.pkl')
+#joblib.dump(final_model, 'xgboost_fraud_model_optimized.pkl')
