@@ -6,3 +6,13 @@ Content-Type: application/json
     "email":"SentAI@gmail.com",
     "password":"Sentpass123"
 }
+
+###
+
+POST http://localhost:3000/api/generate-test-intents
+Content-Type: application/json
+
+{
+    "accountId": "acct_1RMfje2eHVIVa46B",
+    "num": "10"
+}
