@@ -46,7 +46,7 @@ export const StripeCard = () => {
             })
 
             const {accountLink} = await response.json();
-
+            console.log(accountLink)
             if(accountLink) {
               window.location.href = accountLink.url;
             }
