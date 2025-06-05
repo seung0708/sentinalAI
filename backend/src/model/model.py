@@ -16,50 +16,107 @@ from sklearn.metrics import accuracy_score, classification_report
 from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
-'''
-    Supervised Learning 
-        Classification problem
-'''
+# load csv
+transactions = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions.csv")
+
+# convert timestamps
+transactions['timestamp'] = pd.to_datetime(transactions['timestamp'])
+
+# create transaction count per customer per hour
+transactions['hour'] = transactions['timestamp'].dt.floor('h')  
+tx_count = transactions.groupby(['customer_id', 'hour']).size().reset_index(name='transaction_count')
+transactions = transactions.merge(tx_count, on=['customer_id', 'hour'], how='left')
+
+# count failed payments per customer per hour (failed payments heuristic)
+failed_payments = transactions[transactions['status'] == 'failed']
+failed_count = failed_payments.groupby(['customer_id', 'hour']).size().reset_index(name='failed_count')
+transactions = transactions.merge(failed_count, on=['customer_id', 'hour'], how='left')
+transactions['failed_count'] = transactions['failed_count'].fillna(0)
 
 
-#create DataFrame from csv
-df = pd.read_csv("D:\programming\projects\sentinel-ai\\backend\sample_transactions.csv")
+def amount_risk(amount):
+    if amount > 1000:
+        return 'high'
+    elif amount > 500:
+        return 'medium'
+    else:
+        return 'low'
 
-#previews the first n rows of df, default rows is 5
-#print(df.head(10))
-#print(df.info())
-#getting the count of all transactions that are fraud
-print(df['is_fraud'].value_counts())
+def frequency_risk(tx_count):
+    if tx_count > 5:
+        return 'high'
+    elif tx_count > 2:
+        return 'medium'
+    else:
+        return 'low'
+    
+def failed_payment_risk(failed_count, amount):
+    if failed_count >= 2 and amount > 500:
+        return 'high'
+    elif failed_count >= 1:
+        return 'medium'
+    else:
+        return 'low'
 
+def location_risk(city, street, postal_code):
+    fake_street_addresses = ['123 Fake Street, Faketown', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
+    fake_cities = ['Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville']
+    fake_postals = ['99999', '12345','00000' ] 
+
+    if (city in fake_cities) or (street in fake_street_addresses) or (postal_code in fake_postals):
+        return 'high'
+    else:
+        return 'low'
+
+
+transactions['amount_risk'] = transactions['amount'].apply(amount_risk)
+transactions['frequency_risk'] = transactions['transaction_count'].apply(frequency_risk)
+transactions['failed_risk'] = transactions.apply(lambda x: failed_payment_risk(x['failed_count'], x['amount']), axis=1)
+transactions['location_risk'] = transactions.apply(lambda row: location_risk(row['billing_city'], row['billing_line1'], str(row['billing_postal_code'])), axis=1)
+
+def combined_risk(row):
+    risks = [row['amount_risk'], row['frequency_risk'], row['failed_risk'], row['location_risk']]
+    if 'high' in risks:
+        return 'high'
+    elif 'medium' in risks:
+        return 'medium'
+    else:
+        return 'low'
+
+transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
+transactions.to_csv('full_transactions_processed.csv', index=False)
+#print(transactions.head(10))
+#print(transactions['risk_level'].value_counts())
 # encode categorical columns - 
 # converting columns that contain strings into numeerical inputs for the model to read
-df = pd.get_dummies(df, columns=['payment_method', 'currency', 'fraud_reason'], drop_first=True)
+#df = pd.get_dummies(transactions, columns=["city", "state"], drop_first=True)
+
 
 
 # drop non-numeric and irrelevant columns
-columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
+#columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
 #print(columns_to_drop)
-features_to_scale = df.drop(columns=columns_to_drop)
+#features_to_scale = df.drop(columns=columns_to_drop)
 
 
 #splitting data
-X = df.drop(['is_fraud','stripe_id', 'user_id', 'created'], axis=1) # all columns that do not contain numeric values
-y = df['is_fraud'] # Class columns which contains fraud values
+#X = df.drop(['is_fraud','stripe_id', 'user_id', 'created'], axis=1) # all columns that do not contain numeric values
+#y = df['is_fraud'] # Class columns which contains fraud values
 
 #Scale features
-scaler = StandardScaler()
-scaled_array = scaler.fit_transform(features_to_scale)
-df_scaled = pd.DataFrame(scaled_array, columns=features_to_scale.columns)
+# scaler = StandardScaler()
+# scaled_array = scaler.fit_transform(features_to_scale)
+# df_scaled = pd.DataFrame(scaled_array, columns=features_to_scale.columns)
 
 # Split data into test and training samples
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
 # Applying SMOTE on training data
-smote = SMOTE(random_state=42, sampling_strategy=1.0)
-X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+#smote = SMOTE(random_state=42, sampling_strategy=1.0)
+#X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
 # sample for faster tuning
-X_sample,_,y_sample,_ = train_test_split(X_train_resampled, y_train_resampled, train_size=0.3, random_state=42)
+#X_sample,_,y_sample,_ = train_test_split(X_train_resampled, y_train_resampled, train_size=0.3, random_state=42)
 
 
 # hyperparameter grid for xboost
