@@ -11,6 +11,7 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split,RandomizedSearchCV 
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from imblearn.over_sampling import SMOTE
@@ -84,8 +85,12 @@ def combined_risk(row):
         return 'low'
 
 transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
-transactions.to_csv('full_transactions_processed.csv', index=False)
-#print(transactions.head(10))
+#transactions.to_csv('full_transactions_processed.csv', index=False)
+
+transactions_train = transactions[transactions["risk_level"] != "medium"].copy()
+transactions_train["is_fraud"] = transactions_train["risk_level"].apply(lambda row: 1 if row == "high" else 0)
+
+print(transactions_train[transactions_train["risk_level"] == "high"].head())
 #print(transactions['risk_level'].value_counts())
 # encode categorical columns - 
 # converting columns that contain strings into numeerical inputs for the model to read
