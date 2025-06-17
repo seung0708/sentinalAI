@@ -85,13 +85,34 @@ def combined_risk(row):
         return 'low'
 
 transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
+
 #transactions.to_csv('full_transactions_processed.csv', index=False)
 
 transactions_train = transactions[transactions["risk_level"] != "medium"].copy()
+transactions_train["amount_risk"] = transactions_train["amount_risk"].apply(lambda row: 1 if row == "high" else 0)
+transactions_train["frequency_risk"] = transactions_train["frequency_risk"].apply(lambda row: 1 if row == "high" else 0)
+transactions_train["location_risk"] = transactions_train["location_risk"].apply(lambda row: 1 if row == "high" else 0)
+transactions_train["failed_risk"] = transactions_train["failed_risk"].apply(lambda row: 1 if row == "high" else 0)
 transactions_train["is_fraud"] = transactions_train["risk_level"].apply(lambda row: 1 if row == "high" else 0)
 
-print(transactions_train[transactions_train["risk_level"] == "high"].head())
-#print(transactions['risk_level'].value_counts())
+#print(transactions_train.head())
+
+X = transactions_train[["amount_risk", "frequency_risk", "location_risk", "failed_risk"]]
+y = transactions_train["is_fraud"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
+
+smote = SMOTE(random_state=42, sampling_strategy=1.0)
+
+X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
+lr = LogisticRegression()
+lr.fit(X_train_resampled, y_train_resampled)
+
+y_pred = lr.predict(X_test)
+
+print(confusion_matrix(y_test, y_pred))
+
 # encode categorical columns - 
 # converting columns that contain strings into numeerical inputs for the model to read
 #df = pd.get_dummies(transactions, columns=["city", "state"], drop_first=True)
