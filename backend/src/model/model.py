@@ -18,100 +18,109 @@ from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
 # load csv
-transactions = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions.csv")
+transactions_raw = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions.csv")
+transactions_fe = transactions_raw.copy()
 
 # convert timestamps
-transactions['timestamp'] = pd.to_datetime(transactions['timestamp'])
+transactions_fe['timestamp'] = pd.to_datetime(transactions_fe['timestamp'])
 
-# create transaction count per customer per hour
-transactions['hour'] = transactions['timestamp'].dt.floor('h')  
-tx_count = transactions.groupby(['customer_id', 'hour']).size().reset_index(name='transaction_count')
-transactions = transactions.merge(tx_count, on=['customer_id', 'hour'], how='left')
+# create transaction count per customer per interval
+transactions_fe["5min"] = transactions_fe["timestamp"].dt.floor('5min')
+transactions_fe['tx_count_last_5_min'] = transactions_fe.groupby(['customer_id', '5min'])['timestamp'].transform("count")
 
-# count failed payments per customer per hour (failed payments heuristic)
-failed_payments = transactions[transactions['status'] == 'failed']
-failed_count = failed_payments.groupby(['customer_id', 'hour']).size().reset_index(name='failed_count')
-transactions = transactions.merge(failed_count, on=['customer_id', 'hour'], how='left')
-transactions['failed_count'] = transactions['failed_count'].fillna(0)
+transactions_fe["10min"] = transactions_fe["timestamp"].dt.floor('10min')
+transactions_fe['tx_count_last_10_min'] = transactions_fe.groupby(['customer_id', '10min'])['timestamp'].transform("count")
+
+transactions_fe["30min"] = transactions_fe["timestamp"].dt.floor('30min')
+transactions_fe['tx_count_last_30_min'] = transactions_fe.groupby(['customer_id', '30min'])['timestamp'].transform("count")
+
+transactions_fe['hour'] = transactions_fe['timestamp'].dt.floor('h')  
+transactions_fe['tx_count_last_hour'] = transactions_fe.groupby(['customer_id', 'hour'])['timestamp'].transform("count")
+print(transactions_fe.head())
+# # count failed payments per customer per hour (failed payments heuristic)
+# failed_payments = transactions[transactions['status'] == 'failed']
+# failed_count = failed_payments.groupby(['customer_id', 'hour']).size().reset_index(name='failed_count')
+# transactions = transactions.merge(failed_count, on=['customer_id', 'hour'], how='left')
+# transactions['failed_count'] = transactions['failed_count'].fillna(0)
 
 
-def amount_risk(amount):
-    if amount > 1000:
-        return 'high'
-    elif amount > 500:
-        return 'medium'
-    else:
-        return 'low'
+# def amount_risk(amount):
+#     if amount > 1000:
+#         return 1.0
+#     elif amount > 500:
+#         return 0.5
+#     else:
+#         return 0.1
 
-def frequency_risk(tx_count):
-    if tx_count > 5:
-        return 'high'
-    elif tx_count > 2:
-        return 'medium'
-    else:
-        return 'low'
+# def frequency_risk(tx_count):
+#     if tx_count > 5:
+#         return 'high'
+#     elif tx_count > 2:
+#         return 'medium'
+#     else:
+#         return 'low'
     
-def failed_payment_risk(failed_count, amount):
-    if failed_count >= 2 and amount > 500:
-        return 'high'
-    elif failed_count >= 1:
-        return 'medium'
-    else:
-        return 'low'
+# def failed_payment_risk(failed_count, amount):
+#     if failed_count >= 2 and amount > 500:
+#         return 'high'
+#     elif failed_count >= 1:
+#         return 'medium'
+#     else:
+#         return 'low'
 
-def location_risk(city, street, postal_code):
-    fake_street_addresses = ['123 Fake Street, Faketown', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
-    fake_cities = ['Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville']
-    fake_postals = ['99999', '12345','00000' ] 
+# def location_risk(city, street, postal_code):
+#     fake_street_addresses = ['123 Fake Street, Faketown', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
+#     fake_cities = ['Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville']
+#     fake_postals = ['99999', '12345','00000' ] 
 
-    if (city in fake_cities) or (street in fake_street_addresses) or (postal_code in fake_postals):
-        return 'high'
-    else:
-        return 'low'
+#     if (city in fake_cities) or (street in fake_street_addresses) or (postal_code in fake_postals):
+#         return 'high'
+#     else:
+#         return 'low'
 
 
-transactions['amount_risk'] = transactions['amount'].apply(amount_risk)
-transactions['frequency_risk'] = transactions['transaction_count'].apply(frequency_risk)
-transactions['failed_risk'] = transactions.apply(lambda x: failed_payment_risk(x['failed_count'], x['amount']), axis=1)
-transactions['location_risk'] = transactions.apply(lambda row: location_risk(row['billing_city'], row['billing_line1'], str(row['billing_postal_code'])), axis=1)
+# transactions['amount_risk'] = transactions['amount'].apply(amount_risk)
+# transactions['frequency_risk'] = transactions['transaction_count'].apply(frequency_risk)
+# transactions['failed_risk'] = transactions.apply(lambda x: failed_payment_risk(x['failed_count'], x['amount']), axis=1)
+# transactions['location_risk'] = transactions.apply(lambda row: location_risk(row['billing_city'], row['billing_line1'], str(row['billing_postal_code'])), axis=1)
 
-def combined_risk(row):
-    risks = [row['amount_risk'], row['frequency_risk'], row['failed_risk'], row['location_risk']]
-    if 'high' in risks:
-        return 'high'
-    elif 'medium' in risks:
-        return 'medium'
-    else:
-        return 'low'
+# def combined_risk(row):
+#     risks = [row['amount_risk'], row['frequency_risk'], row['failed_risk'], row['location_risk']]
+#     if 'high' in risks:
+#         return 'high'
+#     elif 'medium' in risks:
+#         return 'medium'
+#     else:
+#         return 'low'
 
-transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
+# transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
 
-#transactions.to_csv('full_transactions_processed.csv', index=False)
+# #transactions.to_csv('full_transactions_processed.csv', index=False)
 
-transactions_train = transactions[transactions["risk_level"] != "medium"].copy()
-transactions_train["amount_risk"] = transactions_train["amount_risk"].apply(lambda row: 1 if row == "high" else 0)
-transactions_train["frequency_risk"] = transactions_train["frequency_risk"].apply(lambda row: 1 if row == "high" else 0)
-transactions_train["location_risk"] = transactions_train["location_risk"].apply(lambda row: 1 if row == "high" else 0)
-transactions_train["failed_risk"] = transactions_train["failed_risk"].apply(lambda row: 1 if row == "high" else 0)
-transactions_train["is_fraud"] = transactions_train["risk_level"].apply(lambda row: 1 if row == "high" else 0)
+# transactions_train = transactions[transactions["risk_level"] != "medium"].copy()
+# transactions_train["amount_risk"] = transactions_train["amount_risk"].apply(lambda row: 1 if row == "high" else 0)
+# transactions_train["frequency_risk"] = transactions_train["frequency_risk"].apply(lambda row: 1 if row == "high" else 0)
+# transactions_train["location_risk"] = transactions_train["location_risk"].apply(lambda row: 1 if row == "high" else 0)
+# transactions_train["failed_risk"] = transactions_train["failed_risk"].apply(lambda row: 1 if row == "high" else 0)
+# transactions_train["is_fraud"] = transactions_train["risk_level"].apply(lambda row: 1 if row == "high" else 0)
 
-#print(transactions_train.head())
+# #print(transactions_train.head())
 
-X = transactions_train[["amount_risk", "frequency_risk", "location_risk", "failed_risk"]]
-y = transactions_train["is_fraud"]
+# X = transactions_train[["amount_risk", "frequency_risk", "location_risk", "failed_risk"]]
+# y = transactions_train["is_fraud"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
+# X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
 
-smote = SMOTE(random_state=42, sampling_strategy=1.0)
+# smote = SMOTE(random_state=42, sampling_strategy=1.0)
 
-X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+# X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
-lr = LogisticRegression()
-lr.fit(X_train_resampled, y_train_resampled)
+# lr = LogisticRegression()
+# lr.fit(X_train_resampled, y_train_resampled)
 
-y_pred = lr.predict(X_test)
+# y_pred = lr.predict(X_test)
 
-print(confusion_matrix(y_test, y_pred))
+# print(confusion_matrix(y_test, y_pred))
 
 # encode categorical columns - 
 # converting columns that contain strings into numeerical inputs for the model to read
