@@ -66,7 +66,11 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
         is_fraud_customer = (idx % 10 == 0)
 
         for _ in range(transactions_per_customer):
-            timestamp = now - timedelta(hours=random.uniform(0, 48))
+            minutes_offset = random.randint(0, 48 * 60)  
+            granularity = random.choice([5, 10, 30]) 
+            aligned_minutes = (minutes_offset // granularity) * granularity
+            timestamp = now - timedelta(minutes=aligned_minutes)
+            
             status = random.choices(['failed', 'succeeded'], weights=[0.5, 0.5])[0] if is_fraud_customer else random.choices(['failed', 'succeeded'], weights=[0.1, 0.9])[0]
 
             amount = generate_amount(is_fraud_customer)
