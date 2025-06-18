@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import joblib
 import matplotlib.pyplot as plt 
 from sklearn.metrics import (
@@ -27,16 +28,38 @@ transactions_fe['timestamp'] = pd.to_datetime(transactions_fe['timestamp'])
 # create transaction count per customer per interval
 transactions_fe["5min"] = transactions_fe["timestamp"].dt.floor('5min')
 transactions_fe['tx_count_last_5_min'] = transactions_fe.groupby(['customer_id', '5min'])['timestamp'].transform("count")
+transactions_fe['avg_5min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_5_min'].transform('mean'))
 
 transactions_fe["10min"] = transactions_fe["timestamp"].dt.floor('10min')
 transactions_fe['tx_count_last_10_min'] = transactions_fe.groupby(['customer_id', '10min'])['timestamp'].transform("count")
+transactions_fe['avg_10min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_10_min'].transform('mean'))
 
 transactions_fe["30min"] = transactions_fe["timestamp"].dt.floor('30min')
 transactions_fe['tx_count_last_30_min'] = transactions_fe.groupby(['customer_id', '30min'])['timestamp'].transform("count")
+transactions_fe['avg_30min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_30_min'].transform('mean'))
 
 transactions_fe['hour'] = transactions_fe['timestamp'].dt.floor('h')  
 transactions_fe['tx_count_last_hour'] = transactions_fe.groupby(['customer_id', 'hour'])['timestamp'].transform("count")
-print(transactions_fe.head())
+transactions_fe['avg_hour'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_hour'].transform('mean'))
+#print(transactions_fe.head())
+
+def risk_level_per_interval_transaction(count, avg, weighted=3): 
+    if count > avg * weighted:
+        return 0.8  # High risk
+    elif count > avg:
+        return 0.5  # Medium risk
+    else:
+        return 0.2  # Low risk
+    
+transactions_fe['risk_level_5_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_5_min'], row['avg_5min']), axis=1 )
+transactions_fe['risk_level_10_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_10_min'], row['avg_10min']), axis=1 )
+transactions_fe['risk_level_30_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_30_min'], row['avg_30min']), axis=1 )
+transactions_fe['risk_level_hour'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_5_min'], row['avg_hour']), axis=1 )
+print(transactions_fe[transactions_fe['risk_level_5_min'] > 0.5])
+
+    
+
+
 # # count failed payments per customer per hour (failed payments heuristic)
 # failed_payments = transactions[transactions['status'] == 'failed']
 # failed_count = failed_payments.groupby(['customer_id', 'hour']).size().reset_index(name='failed_count')
