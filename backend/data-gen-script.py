@@ -67,8 +67,8 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
 
         for _ in range(transactions_per_customer):
             minutes_offset = random.randint(0, 48 * 60)  
-            granularity = random.choice([5, 10, 30]) 
-            aligned_minutes = (minutes_offset // granularity) * granularity
+            interval = random.choice([5, 10, 30]) 
+            aligned_minutes = (minutes_offset // interval) * interval
             timestamp = now - timedelta(minutes=aligned_minutes)
             
             status = random.choices(['failed', 'succeeded'], weights=[0.5, 0.5])[0] if is_fraud_customer else random.choices(['failed', 'succeeded'], weights=[0.1, 0.9])[0]
@@ -80,7 +80,6 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
             billing_name = (faker.first_name() + " " + faker.last_name() + "_fraud") if (is_fraud_customer and random.random() < 0.3) else faker.name()
 
             if is_fraud_customer:
-                # 10% chance of obvious fake address
                 if random.random() < 0.1:
                     street = random.choice(fraud_street)
                     city = random.choice(fraud_city)
@@ -97,7 +96,6 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
                 state = faker.state_abbr()
                 postal_code = faker.postcode()
 
-            #payment_method_type = random.choice(PAYMENT_METHODS)
             payment_intent_id = generate_payment_intent_id()
 
             transaction = {
