@@ -61,9 +61,19 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
     now = datetime.now()
 
     customer_ids = [generate_stripe_customer_id() for _ in range(num_customers)]
+    # creating a home address dictionary for each customer_id
+    default_addresses = {}
+    for cid in customer_ids:
+        default_addresses[cid] = {
+            "street": faker.street_address(),
+            "city": faker.city(),
+            "state": faker.state_abbr(),
+            "postal_code": faker.postcode()
+        }
 
     for idx, customer_id in enumerate(customer_ids, start=1):
         is_fraud_customer = (idx % 10 == 0)
+
 
         for _ in range(transactions_per_customer):
             minutes_offset = random.randint(0, 48 * 60)  
