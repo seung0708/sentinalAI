@@ -1,6 +1,5 @@
-
-import uuid
 import csv
+import numpy as np
 import random
 import string
 from datetime import datetime, timedelta
@@ -41,70 +40,112 @@ def generate_fraud_email():
 def generate_fraud_phone():
     return random.choice(fraud_phones_pool) 
 
-def generate_amount(is_fraud):
-    if is_fraud:
-        # 70% small test amounts, 30% large suspicious amounts
-        if random.random() < 0.7:
-            return round(random.uniform(1, 20), 2)
-        else:
-            return round(random.uniform(800, 1500), 2)
-    else:
-        # normal transactions mainly between 10-200, some up to 1000
-        if random.random() < 0.9:
-            return round(random.uniform(10, 200), 2)
-        else:
-            return round(random.uniform(200, 1000), 2)
-        
-
-def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20):
+def generate_transactions(business_size='small', fraud_customer_rate=0.1, days=30):
     transactions = []
+    
     now = datetime.now()
+
+    # set number of customers and avg txn count range based on business size
+    if business_size == 'small':
+        num_customers = random.randint(50, 150)
+        txn_per_cust_range = (5, 15)
+    elif business_size == 'medium':
+        num_customers = random.randint(200, 500)
+        txn_per_cust_range = (10, 25)
+    elif business_size == 'large':
+        num_customers = random.randint(600, 1000)
+        txn_per_cust_range = (20, 40)
+    else:
+        raise ValueError("business_size must be 'small', 'medium', or 'large'")
 
     customer_ids = [generate_stripe_customer_id() for _ in range(num_customers)]
     # creating a home address dictionary for each customer_id
     default_addresses = {}
-    for cid in customer_ids:
-        default_addresses[cid] = {
+    for customer_id in customer_ids:
+        default_addresses[customer_id] = {
             "street": faker.street_address(),
             "city": faker.city(),
             "state": faker.state_abbr(),
             "postal_code": faker.postcode()
         }
 
-    for idx, customer_id in enumerate(customer_ids, start=1):
-        is_fraud_customer = (idx % 10 == 0)
+    for customer_id in customer_ids:
+        is_fraud_customer = random.random() < fraud_customer_rate
 
+        txn_count = random.randint(txn_per_cust_range[0], txn_per_cust_range[1])
 
-        for _ in range(transactions_per_customer):
-            minutes_offset = random.randint(0, 48 * 60)  
-            interval = random.choice([5, 10, 30]) 
-            aligned_minutes = (minutes_offset // interval) * interval
-            timestamp = now - timedelta(minutes=aligned_minutes)
-            
+        transaction_times = []
+
+        for _ in range(txn_count):
+            r = random.random()
+            if r < 0.7:
+                hour = random.randint(8, 20)   # normal hours
+            elif r < 0.9:
+                hour = random.randint(21, 23)  # late night
+            else:
+                hour = random.randint(0, 5)    # early morning
+
+            minutes_offset = random.randint(0, days * 24 * 60)
+            intervals = random.choice([5, 10, 30])
+            aligned_minutes = (minutes_offset // intervals) * intervals
+            txn_time = now - timedelta(minutes=aligned_minutes)
+            txn_time = txn_time.replace(hour=hour, minute=txn_time.minute, second=txn_time.second, microsecond=0)
+
+            transaction_times.append(txn_time)
+        
+        transaction_times.sort()
+        default_addr = default_addresses[customer_id]
+
+        for timestamp in transaction_times:        
             status = random.choices(['failed', 'succeeded'], weights=[0.5, 0.5])[0] if is_fraud_customer else random.choices(['failed', 'succeeded'], weights=[0.1, 0.9])[0]
 
-            amount = generate_amount(is_fraud_customer)
+            if business_size == 'small':
+                normal_amount_range = (5, 100)
+                fraud_amount_range = (50, 500)
+            elif business_size == 'medium':
+                normal_amount_range = (10, 300)
+                fraud_amount_range = (100, 1000)
+            else:  # large
+                normal_amount_range = (20, 1000)
+                fraud_amount_range = (200, 2000)
+
+            if is_fraud_customer:
+                amount = round(random.uniform(fraud_amount_range[0], fraud_amount_range[1]), 2)
+            else:
+                amount = round(random.uniform(normal_amount_range[0], normal_amount_range[1]), 2)
 
             billing_email = generate_fraud_email() if (is_fraud_customer and random.random() < 0.3) else faker.email()
             billing_phone = generate_fraud_phone() if (is_fraud_customer and random.random() < 0.3) else faker.phone_number()
             billing_name = (faker.first_name() + " " + faker.last_name() + "_fraud") if (is_fraud_customer and random.random() < 0.3) else faker.name()
 
+           # for fraud, occasionally change address to fake or random; else mostly stable with rare change
             if is_fraud_customer:
-                if random.random() < 0.1:
+                if random.random() < 0.2:
                     street = random.choice(fraud_street)
                     city = random.choice(fraud_city)
-                    state = faker.city()
+                    state = faker.state_abbr()
                     postal_code = random.choice(fraud_zip)
                 else:
-                    street = faker.street_address()
-                    city = faker.city()
-                    state = faker.state_abbr()
-                    postal_code = faker.postcode()
+                    street = default_addr['street']
+                    city = default_addr['city']
+                    state = default_addr['state']
+                    postal_code = default_addr['postal_code']
             else:
-                street = faker.street_address()
-                city = faker.city()
-                state = faker.state_abbr()
-                postal_code = faker.postcode()
+                # non-fraud customer: 95% same address, 5% move to new address
+                if random.random() < 0.05:
+                    # New address
+                    default_addr = {
+                        "street": faker.street_address(),
+                        "city": faker.city(),
+                        "state": faker.state_abbr(),
+                        "postal_code": faker.postcode()
+                    }
+                    default_addresses[customer_id] = default_addr
+
+                street = default_addr['street']
+                city = default_addr['city']
+                state = default_addr['state']
+                postal_code = default_addr['postal_code']
 
             payment_intent_id = generate_payment_intent_id()
 
@@ -156,8 +197,8 @@ def generate_transactions(num_customers=CUSTOMERS, transactions_per_customer=20)
 #         data.append(generate_transaction(fraud))
 #     return data
 
-def write_csv(filename="sample_transactions.csv"):
-    data = generate_transactions(CUSTOMERS, transactions_per_customer=20)
+def write_csv(filename="sample_transactions_small.csv"):
+    data = generate_transactions('small')
     with open(filename, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=data[0].keys())
         writer.writeheader()
