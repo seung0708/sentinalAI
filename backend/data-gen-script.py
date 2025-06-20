@@ -97,8 +97,6 @@ def generate_transactions(business_size='small', fraud_customer_rate=0.1, days=3
         default_addr = default_addresses[customer_id]
 
         for timestamp in transaction_times:        
-            status = random.choices(['failed', 'succeeded'], weights=[0.5, 0.5])[0] if is_fraud_customer else random.choices(['failed', 'succeeded'], weights=[0.1, 0.9])[0]
-
             if business_size == 'small':
                 normal_amount_range = (5, 100)
                 fraud_amount_range = (50, 500)
@@ -153,7 +151,7 @@ def generate_transactions(business_size='small', fraud_customer_rate=0.1, days=3
                 "payment_intent_id": payment_intent_id,
                 "customer_id": customer_id,
                 "timestamp": timestamp.isoformat(),
-                "status": status,
+                "status": 'succeeded',
                 "amount": amount,
                 "billing_email": billing_email, 
                 "billing_name": billing_name,

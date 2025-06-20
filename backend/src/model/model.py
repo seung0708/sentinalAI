@@ -95,7 +95,7 @@ def add_combined_frequency_risk(df, intervals, fixed_thresholds, weight=3):
 
     return df
 
-def add_address_risk_score(df):
+def add_address_risk(df):
     fraud_city = {'Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville'}
     pattern = r'(?i)\b(fake|null|test|unknown|imaginary|p\.?\s?o\.?\s?box)\b'
 
@@ -123,82 +123,40 @@ def add_address_risk_score(df):
 
     return df
 
+def add_amount_risk(df):
+    df['avg_amount'] = df.groupby('customer_id')['amount'].transform('mean')
+
+    def get_score(amount, avg):
+        if amount >= avg * 3 or amount <= avg / 3:
+            return 0.9
+        elif amount >= avg * 2 or amount <= avg /2:
+            return 0.7
+        elif amount >= avg * 1.5 or amount <= avg / 1.5:
+            return 0.5
+        else: 
+            return 0.2
+        
+    df['amount_risk_score'] = df.apply(lambda row: get_score(row['amount'], row['avg_amount']), axis=1)
+    return df
+        
 transactions_fe = add_combined_frequency_risk(transactions_fe, intervals, fixed_thresholds)
-transactions_fe = add_address_risk_score(transactions_fe)
-print(transactions_fe['combined_address_risk'].value_counts())
+transactions_fe = add_address_risk(transactions_fe)
+transactions_fe = add_amount_risk(transactions_fe)
+
+transactions_fe['overall_risk'] = (0.5 * transactions_fe['combined_frequency_risk'] + 0.3 * transactions_fe['combined_address_risk'] + 0.2 * transactions_fe['amount_risk_score'])
+#print(transactions_fe['overall_risk'].mean())
 
 
+def is_fraud(row):
+    if row['overall_risk'] >= 0.5:
+        return 0.9
+    elif row['overall_risk'] >= 0.35 and row['overall_risk'] < 0.5:
+        return 0.5
+    else:
+        return 0.1
     
-
-
-# # count failed payments per customer per hour (failed payments heuristic)
-# failed_payments = transactions[transactions['status'] == 'failed']
-# failed_count = failed_payments.groupby(['customer_id', 'hour']).size().reset_index(name='failed_count')
-# transactions = transactions.merge(failed_count, on=['customer_id', 'hour'], how='left')
-# transactions['failed_count'] = transactions['failed_count'].fillna(0)
-
-
-# def amount_risk(amount):
-#     if amount > 1000:
-#         return 1.0
-#     elif amount > 500:
-#         return 0.5
-#     else:
-#         return 0.1
-
-# def frequency_risk(tx_count):
-#     if tx_count > 5:
-#         return 'high'
-#     elif tx_count > 2:
-#         return 'medium'
-#     else:
-#         return 'low'
-    
-# def failed_payment_risk(failed_count, amount):
-#     if failed_count >= 2 and amount > 500:
-#         return 'high'
-#     elif failed_count >= 1:
-#         return 'medium'
-#     else:
-#         return 'low'
-
-# def location_risk(city, street, postal_code):
-#     fake_street_addresses = ['123 Fake Street, Faketown', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
-#     fake_cities = ['Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville']
-#     fake_postals = ['99999', '12345','00000' ] 
-
-#     if (city in fake_cities) or (street in fake_street_addresses) or (postal_code in fake_postals):
-#         return 'high'
-#     else:
-#         return 'low'
-
-
-# transactions['amount_risk'] = transactions['amount'].apply(amount_risk)
-# transactions['frequency_risk'] = transactions['transaction_count'].apply(frequency_risk)
-# transactions['failed_risk'] = transactions.apply(lambda x: failed_payment_risk(x['failed_count'], x['amount']), axis=1)
-# transactions['location_risk'] = transactions.apply(lambda row: location_risk(row['billing_city'], row['billing_line1'], str(row['billing_postal_code'])), axis=1)
-
-# def combined_risk(row):
-#     risks = [row['amount_risk'], row['frequency_risk'], row['failed_risk'], row['location_risk']]
-#     if 'high' in risks:
-#         return 'high'
-#     elif 'medium' in risks:
-#         return 'medium'
-#     else:
-#         return 'low'
-
-# transactions['risk_level'] = transactions.apply(combined_risk, axis=1)
-
-# #transactions.to_csv('full_transactions_processed.csv', index=False)
-
-# transactions_train = transactions[transactions["risk_level"] != "medium"].copy()
-# transactions_train["amount_risk"] = transactions_train["amount_risk"].apply(lambda row: 1 if row == "high" else 0)
-# transactions_train["frequency_risk"] = transactions_train["frequency_risk"].apply(lambda row: 1 if row == "high" else 0)
-# transactions_train["location_risk"] = transactions_train["location_risk"].apply(lambda row: 1 if row == "high" else 0)
-# transactions_train["failed_risk"] = transactions_train["failed_risk"].apply(lambda row: 1 if row == "high" else 0)
-# transactions_train["is_fraud"] = transactions_train["risk_level"].apply(lambda row: 1 if row == "high" else 0)
-
-# #print(transactions_train.head())
+transactions_fe['is_fraud'] = transactions_fe.apply(is_fraud, axis=1)
+print(transactions_fe['is_fraud'].value_counts())
 
 # X = transactions_train[["amount_risk", "frequency_risk", "location_risk", "failed_risk"]]
 # y = transactions_train["is_fraud"]
