@@ -18,44 +18,85 @@ from sklearn.metrics import accuracy_score, classification_report
 from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
+pd.set_option('display.max_columns', None)
+
 # load csv
-transactions_raw = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions.csv")
+transactions_raw = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions_small.csv")
 transactions_fe = transactions_raw.copy()
 
-# convert timestamps
+#convert timestamp column to datetime object
 transactions_fe['timestamp'] = pd.to_datetime(transactions_fe['timestamp'])
 
-# create transaction count per customer per interval
-transactions_fe["5min"] = transactions_fe["timestamp"].dt.floor('5min')
-transactions_fe['tx_count_last_5_min'] = transactions_fe.groupby(['customer_id', '5min'])['timestamp'].transform("count")
-transactions_fe['avg_5min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_5_min'].transform('mean'))
+intervals = ['5min', '10min', '30min', '1h']
+fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
 
-transactions_fe["10min"] = transactions_fe["timestamp"].dt.floor('10min')
-transactions_fe['tx_count_last_10_min'] = transactions_fe.groupby(['customer_id', '10min'])['timestamp'].transform("count")
-transactions_fe['avg_10min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_10_min'].transform('mean'))
+def add_combined_frequency_risk(df, intervals, fixed_thresholds, weight=3):
+    # sorts the intervals list to shortest first
+    # Timedelta converts the string into actual time objects in order to sort the list (i.e. 5min -> 0 days 00:05:00)
+    # doing this so we can catch suspicious activity as soon as they happen
+    intervals_sorted = sorted(intervals, key=lambda x: pd.Timedelta(x))
 
-transactions_fe["30min"] = transactions_fe["timestamp"].dt.floor('30min')
-transactions_fe['tx_count_last_30_min'] = transactions_fe.groupby(['customer_id', '30min'])['timestamp'].transform("count")
-transactions_fe['avg_30min'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_30_min'].transform('mean'))
+    # keep a list of all risk scores from every time interval to combine them later
+    risk_cols = []
 
-transactions_fe['hour'] = transactions_fe['timestamp'].dt.floor('h')  
-transactions_fe['tx_count_last_hour'] = transactions_fe.groupby(['customer_id', 'hour'])['timestamp'].transform("count")
-transactions_fe['avg_hour'] = np.floor(transactions_fe.groupby('customer_id')['tx_count_last_hour'].transform('mean'))
-#print(transactions_fe.head())
+    for interval in intervals_sorted:
+        # adding interval column (i.e. '5min') and rounding down each transaction's timestamp to the current interval
+        df[interval] = df['timestamp'].dt.floor(interval)
 
-def risk_level_per_interval_transaction(count, avg, weighted=3): 
-    if count > avg * weighted:
-        return 0.8  # High risk
-    elif count > avg:
-        return 0.5  # Medium risk
-    else:
-        return 0.2  # Low risk
-    
-transactions_fe['risk_level_5_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_5_min'], row['avg_5min']), axis=1 )
-transactions_fe['risk_level_10_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_10_min'], row['avg_10min']), axis=1 )
-transactions_fe['risk_level_30_min'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_30_min'], row['avg_30min']), axis=1 )
-transactions_fe['risk_level_hour'] = transactions_fe.apply(lambda row: risk_level_per_interval_transaction(row['tx_count_last_5_min'], row['avg_hour']), axis=1 )
-print(transactions_fe[transactions_fe['risk_level_5_min'] > 0.5])
+        count_col = f'tx_count_last_{interval}'
+        avg_col = f'avg_tx_last_{interval}'
+        risk_fixed_col = f'risk_fixed_{interval}'
+        risk_relative_col = f'risk_relative_{interval}'
+        combined_risk_col = f'risk_combined_{interval}'
+
+        # actual number of transactions in each time interval
+        df[count_col] = df.groupby(['customer_id', interval])['timestamp'].transform('count')
+
+        # customer's average transaction count for each interval (to capture typical behavior)
+        df[avg_col] = df.groupby('customer_id')[count_col].transform('mean')
+
+        # lags when transaction count exceeds an absolute threshold (e.g., 3 transactions in 5 min)
+        threshold = fixed_thresholds.get(interval, None)
+        if threshold is not None:
+            df[risk_fixed_col] = df[count_col].apply(lambda c: 0.9 if c >= threshold else 0.0)
+        else:
+            df[risk_fixed_col] = 0.0
+
+        # flags when count significantly exceeds customer's average behavior (using a weight multiplier)
+        def relative_risk(count, avg):
+            if pd.isna(avg) or avg == 0:
+                return 0.2  # Low risk if no average
+            if count > avg * weight:
+                return 0.9
+            elif count > avg * 1.5:
+                return 0.7
+            elif count > avg:
+                return 0.5
+            else:
+                return 0.2
+
+        df[risk_relative_col] = df.apply(lambda row: relative_risk(row[count_col], row[avg_col]), axis=1)
+
+        # Combine fixed and relative risks for this interval by taking the maximum,
+        # so the highest risk signal from either method is used to flag suspicious activity.
+        df[combined_risk_col] = df[[risk_fixed_col, risk_relative_col]].max(axis=1)
+
+        risk_cols.append(combined_risk_col)
+
+    # For each row, return the highest risk from the shortest interval flagged
+    def shortest_interval_risk(row):
+        for col in risk_cols:
+            if row[col] >= 0.5:  # threshold to consider flagged, adjust as needed
+                return row[col]
+        return 0.2  # low risk if none flagged
+
+    df['combined_risk'] = df.apply(shortest_interval_risk, axis=1)
+
+    return df
+
+
+transactions_fe = add_combined_frequency_risk(transactions_fe, intervals, fixed_thresholds)
+print(transactions_fe[transactions_fe['billing_postal_code'] == 00000])
 
     
 
