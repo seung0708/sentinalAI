@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 import joblib
 import matplotlib.pyplot as plt 
 from sklearn.metrics import (
@@ -90,13 +91,42 @@ def add_combined_frequency_risk(df, intervals, fixed_thresholds, weight=3):
                 return row[col]
         return 0.2  # low risk if none flagged
 
-    df['combined_risk'] = df.apply(shortest_interval_risk, axis=1)
+    df['combined_frequency_risk'] = df.apply(shortest_interval_risk, axis=1)
 
     return df
 
+def add_address_risk_score(df):
+    fraud_city = {'Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville'}
+    pattern = r'(?i)\b(fake|null|test|unknown|imaginary|p\.?\s?o\.?\s?box)\b'
+
+    df['is_fake_street'] = df['billing_line1'].apply(lambda row: 1 if isinstance(row, str) and isinstance(re.search(pattern, row), re.Match) else 0)
+    df['is_fake_city'] = df['billing_city'].apply(lambda city: 1 if isinstance(city, str) and city.strip() in fraud_city else 0)
+
+    df['fake_address_score'] = df[['is_fake_street', 'is_fake_city']].max(axis=1).apply(lambda x: 0.9 if x == 1 else 0.2)
+
+    df['street_counts'] = df.groupby('customer_id')['billing_line1'].transform('nunique')
+    df['city_counts'] = df.groupby('customer_id')['billing_city'].transform('nunique')
+    df['state_counts'] = df.groupby('customer_id')['billing_state'].transform('nunique')
+    df['zip_counts'] = df.groupby('customer_id')['billing_postal_code'].transform('nunique')
+
+    def calc_risk_score(row):
+        if row['street_counts'] == 1 and row['city_counts'] == 1 and row['state_counts'] == 1 and row['zip_counts'] == 1:
+            return 0.2
+        elif row['street_counts'] >= 4 or row['city_counts'] >= 4 or row['state_counts'] >= 4 or row['zip_counts'] >= 4:
+            return 0.9
+        else:
+            return 0.5
+        
+    df['addr_change_score'] = df.apply(calc_risk_score, axis=1)
+
+    df['combined_address_risk'] = df[['fake_address_score', 'addr_change_score']].max(axis=1)
+
+    return df
 
 transactions_fe = add_combined_frequency_risk(transactions_fe, intervals, fixed_thresholds)
-print(transactions_fe[transactions_fe['billing_postal_code'] == 00000])
+transactions_fe = add_address_risk_score(transactions_fe)
+print(transactions_fe['combined_address_risk'].value_counts())
+
 
     
 
