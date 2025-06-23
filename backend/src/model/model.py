@@ -189,8 +189,10 @@ random_search.fit(X_train, y_train)
 
 #print best parameter after tuning
 best_model = random_search.best_estimator_
-print(best_model)
+#print(best_model)
 y_pred = best_model.predict(X_test)
 
-print(classification_report(y_test, y_pred))
-print(confusion_matrix(y_test, y_pred))
+#print(classification_report(y_test, y_pred))
+#print(confusion_matrix(y_test, y_pred))
+
+joblib.dump(best_model, 'fraud.pkl')
