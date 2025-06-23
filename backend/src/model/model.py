@@ -149,102 +149,48 @@ transactions_fe['overall_risk'] = (0.5 * transactions_fe['combined_frequency_ris
 
 def is_fraud(row):
     if row['overall_risk'] >= 0.5:
-        return 0.9
+        return 2
     elif row['overall_risk'] >= 0.35 and row['overall_risk'] < 0.5:
-        return 0.5
+        return 1
     else:
-        return 0.1
+        return 0
     
 transactions_fe['is_fraud'] = transactions_fe.apply(is_fraud, axis=1)
-print(transactions_fe['is_fraud'].value_counts())
+#print(transactions_fe.head())
 
-# X = transactions_train[["amount_risk", "frequency_risk", "location_risk", "failed_risk"]]
-# y = transactions_train["is_fraud"]
+X = transactions_fe[['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score']]
+y = transactions_fe["is_fraud"]
 
-# X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
-
-# smote = SMOTE(random_state=42, sampling_strategy=1.0)
-
-# X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-
-# lr = LogisticRegression()
-# lr.fit(X_train_resampled, y_train_resampled)
-
-# y_pred = lr.predict(X_test)
-
-# print(confusion_matrix(y_test, y_pred))
-
-# encode categorical columns - 
-# converting columns that contain strings into numeerical inputs for the model to read
-#df = pd.get_dummies(transactions, columns=["city", "state"], drop_first=True)
-
-
-
-# drop non-numeric and irrelevant columns
-#columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
-#print(columns_to_drop)
-#features_to_scale = df.drop(columns=columns_to_drop)
-
-
-#splitting data
-#X = df.drop(['is_fraud','stripe_id', 'user_id', 'created'], axis=1) # all columns that do not contain numeric values
-#y = df['is_fraud'] # Class columns which contains fraud values
-
-#Scale features
-# scaler = StandardScaler()
-# scaled_array = scaler.fit_transform(features_to_scale)
-# df_scaled = pd.DataFrame(scaled_array, columns=features_to_scale.columns)
-
-# Split data into test and training samples
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
-
-# Applying SMOTE on training data
-#smote = SMOTE(random_state=42, sampling_strategy=1.0)
-#X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-
-# sample for faster tuning
-#X_sample,_,y_sample,_ = train_test_split(X_train_resampled, y_train_resampled, train_size=0.3, random_state=42)
-
+X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
 
 # hyperparameter grid for xboost
-# param_dist = {
-#     'n_estimators': [50, 100],
-#     'max_depth': [3, 6, 10],
-#     'learning_rate': [0.01, 0.1, 0.2],
-#     'subsample': [0.8, 1.0],
-#     'colsample_bytree': [0.8, 1.0],
-#     'scale_pos_weight': [10]
-# }
+param_dist = {
+    'n_estimators': [50, 100],
+    'max_depth': [3, 6, 10],
+    'learning_rate': [0.01, 0.1, 0.2],
+    'subsample': [0.8, 1.0],
+    'colsample_bytree': [0.8, 1.0],
+}
 
-# xgb = XGBClassifier( eval_metric='logloss', random_state=42)
-# random_search = RandomizedSearchCV(
-#     XGBClassifier(random_state=42), 
-#     param_distributions=param_dist, 
-#     n_iter=5, 
-#     scoring='recall',
-#     refit= True, 
-#     verbose = 1, 
-#     n_jobs= 1, 
-#     cv=2
-#     )
+xgb = XGBClassifier(objective='multi:softprob', num_class=3, eval_metric='logloss', random_state=42)
+random_search = RandomizedSearchCV(
+    xgb, 
+    param_distributions=param_dist, 
+    n_iter=5, 
+    scoring='f1_macro',
+    refit= True, 
+    verbose = 1, 
+    n_jobs= 1, 
+    cv=5
+    )
 
 #fit model for grid search
-#random_search.fit(X_sample, y_sample)
+random_search.fit(X_train, y_train)
 
 #print best parameter after tuning
-#print("Best parameters:", random_search.best_params_)
+best_model = random_search.best_estimator_
+print(best_model)
+y_pred = best_model.predict(X_test)
 
-#Retrain final model on full resampled data
-#final_model = XGBClassifier(**random_search.best_params_, eval_metric='logloss', random_state=42)
-#final_model.fit(X_train_resampled, y_train_resampled)
-
-# print classification
-#y_pred_proba = final_model.predict_proba(X_test)[:, 1]
-#y_pred = (y_pred_proba > 0.3).astype(int)
-#print(classification_report(y_test, y_pred))
-
-#1.CONFUSION MATRIX
-
-
-# joblib.dump(model, 'fraud_model_smote.pkl')
-#joblib.dump(final_model, 'xgboost_fraud_model_optimized.pkl')
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
