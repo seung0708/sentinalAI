@@ -3,6 +3,8 @@ import Stripe from 'stripe'
 import {stripe} from '@/app/api/lib/stripe'
 import { createClient } from "@/utils/supabase/server";
 
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
 export async function POST(req: NextRequest){
     const supabase = await createClient();
 
@@ -14,32 +16,14 @@ export async function POST(req: NextRequest){
 
     // connect to webhook
     try {
-        event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
+        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
         // handle Stripe Event
     
         switch(event.type){
             // when event is payment_intent.succeded
             case 'payment_intent.succeeded':
-                const paymentIntent = event.data.object as Stripe.PaymentIntent 
-    
-                // create tranasctionData object to hold data properties returned from webhook
-                const transactionData = {
-                    stripe_id : paymentIntent.id,
-                    amount : paymentIntent.amount,
-                    currency : paymentIntent.currency,
-                    created : new Date(paymentIntent.created * 1000).toString(),
-                    payment_method : paymentIntent.payment_method,
-                    customer_email: paymentIntent.receipt_email,
-                    location: paymentIntent.shipping?.address?.city,
-                    status: paymentIntent.status,
-                    name: paymentIntent.shipping?.name,
-                    metadata: paymentIntent.metadata
-                }
-    
-                // insert data into transactions table
-                await supabase.from('transactions').insert([transactionData]);
-    
-                console.log('Payment Intent was succesful', paymentIntent)
+                const paymentIntent = event.data.object as Stripe.PaymentIntent
+                console.log(paymentIntent)
                 break
     
             // adding more cases - need to think about other event cases
