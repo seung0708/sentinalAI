@@ -1,13 +1,9 @@
+import { NextResponse } from "next/server";
 import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
 import Stripe from 'stripe';
 
-enum PaymentMethodType {
-  Card = 'card',
-  SepaDebit = 'sepa_debit',
-  Ideal = 'ideal',
-  Fpx = 'fpx',
-}
+
 
 interface TestDataItem {
     amount: number, 
@@ -30,52 +26,72 @@ interface TestDataItem {
     }
 }
 
-const chooseRandomData = (array: TestDataItem[]) => {
-    const randomIndex = Math.floor(Math.random() * array.length)
-    return array[randomIndex]
-}
-
 export const createPaymentIntent = async (accountId: string) => {
-    const randomData = chooseRandomData(testData)
-    const {amount, currency, billing_details, status, payment_method} = randomData
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'John Kim')
+    const {amount, currency, billing_details, payment_method} = transactions[0]
+    let customer
     try{
+        const customersList = await stripe.customers.list({
+            stripeAccount: accountId
+        })
+        console.log('customersList', customersList)
+        const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details.name)
+
+        if (!testTransactionCustomer[0]?.id) {
+            const createCustomer = await stripe.customers.create({
+                name: billing_details.name,
+                email: billing_details.email,
+                phone: billing_details.phone, 
+                address: billing_details.address
+            }, {
+                stripeAccount: accountId
+            })
+
+            customer = createCustomer
+        } else {
+            customer = testTransactionCustomer[0]
+        }
+        console.log('customer', customer)
+        if (!customer || !customer.id) {
+            throw new Error("Customer creation failed or missing ID");
+        }
 
         const paymentMethod = await stripe.paymentMethods.create({
-            type: 'card', 
+            type: 'card',
             card: {token: payment_method.token}, //using the test visa card
-            billing_details: {
-                address: {
-                    city: billing_details.address.city,
-                    country: 'US',
-                    line1: billing_details.address.line1, 
-                    postal_code: billing_details.address.postal_code, 
-                    state: billing_details.address.state
-                },
-                name: billing_details.name, 
-                email: billing_details.email, 
-                phone: billing_details.phone
-                
-            }
+            billing_details: billing_details
         }, {
             stripeAccount: accountId
         })
+        console.log('paymentMethod', paymentMethod)
+        if (!paymentMethod|| !paymentMethod.id) {
+            throw new Error("PaymentMethod creation failed or missing ID");
+        }
 
-        console.log('paymentMethod created', paymentMethod)
+        await stripe.paymentMethods.attach(
+            paymentMethod.id, 
+            {
+                customer: customer?.id
+            }, {
+                stripeAccount: accountId
+            }
+        )
 
-        const payIntent = await stripe.paymentIntents.create({
+        const paymentIntent = await stripe.paymentIntents.create({
             amount,
-            currency: currency,
+            currency,
             automatic_payment_methods: {
                 enabled: true,
                 allow_redirects: 'never'
             },
             payment_method: paymentMethod.id,
+            customer: customer.id,
             confirm: true
         },{
             stripeAccount: accountId
         })
-
-        return payIntent
+        console.log('paymentIntent', paymentIntent)
+        return paymentIntent
 
         
     } catch (error){
@@ -83,12 +99,13 @@ export const createPaymentIntent = async (accountId: string) => {
     }
 }
 
-export const generatePaymentIntents = async ( accountId: string, count= 10) =>{
-    const result = []
-    for (let i = 0; i < count; i++){
-        const payment = await createPaymentIntent(accountId)
-        result.push(payment);
-    }
-
-    return result
-}
+// export const generatePaymentIntents = async ( accountId: string) =>{
+//     const transactions = testData.filter(transaction => transaction.billing_details?.name == 'John Kim')
+//     const results = []
+//     for (let i = 0; i < transactions.length; i++){
+//         const payment = await createPaymentIntent(accountId, transactions[i])
+//         if(!payment) throw new Error('Error when creating payment')
+//         results.push(payment);
+//     }
+//     return results
+// }
