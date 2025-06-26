@@ -41,13 +41,16 @@ export async function POST(req: NextRequest){
                     payment_method: payment_method_types[0]
                 }
                 
-                await fetch('http://localhost:5000/predict-fraud', {
+                const data = await fetch('http://localhost:5000/predict-fraud', {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json',    
                     },
                     body: JSON.stringify(formattedData)
                 })
+
+                const result = await data.json()
+                console.log(result)
                 
                 break
     
