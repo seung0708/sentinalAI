@@ -28,13 +28,12 @@ interface TestDataItem {
 
 export const createPaymentIntent = async (accountId: string) => {
     const transactions = testData.filter(transaction => transaction.billing_details?.name == 'John Kim')
-    const {amount, currency, billing_details, payment_method} = transactions[0]
+    const {amount, currency, billing_details, payment_method} = transactions[1]
     let customer
     try{
         const customersList = await stripe.customers.list({
             stripeAccount: accountId
         })
-        console.log('customersList', customersList)
         const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details.name)
 
         if (!testTransactionCustomer[0]?.id) {
@@ -51,7 +50,6 @@ export const createPaymentIntent = async (accountId: string) => {
         } else {
             customer = testTransactionCustomer[0]
         }
-        console.log('customer', customer)
         if (!customer || !customer.id) {
             throw new Error("Customer creation failed or missing ID");
         }
@@ -63,7 +61,6 @@ export const createPaymentIntent = async (accountId: string) => {
         }, {
             stripeAccount: accountId
         })
-        console.log('paymentMethod', paymentMethod)
         if (!paymentMethod|| !paymentMethod.id) {
             throw new Error("PaymentMethod creation failed or missing ID");
         }
@@ -86,11 +83,11 @@ export const createPaymentIntent = async (accountId: string) => {
             },
             payment_method: paymentMethod.id,
             customer: customer.id,
-            confirm: true
+            confirm: true,
+            expand: ['charges', 'customer']
         },{
             stripeAccount: accountId
         })
-        console.log('paymentIntent', paymentIntent)
         return paymentIntent
 
         
