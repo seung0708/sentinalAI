@@ -59,7 +59,12 @@ export async function POST(req: NextRequest){
                     payment_method: formattedData.payment_method, 
                     customer_email: formattedData.billing_email, 
                     location: `${formattedData.billing_line1} ${formattedData.billing_city}, ${formattedData.billing_state}, ${formattedData.billing_postal_code}`,
-                    name: formattedData.billiing_name
+                    name: formattedData.billiing_name, 
+                    risk_level_low: result.probabilities.low, 
+                    risk_level_med: result.probabilities.medium, 
+                    risk_level_high: result.probabilities.high,
+                    predicted_risk: result.predicted_risk, 
+                    
                 })
                 
                 break
