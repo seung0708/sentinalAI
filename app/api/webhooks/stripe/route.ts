@@ -50,6 +50,17 @@ export async function POST(req: NextRequest){
 
                 const result = await data.json()
                 console.log(result)
+
+                await supabase.from('transactions').insert({
+                    stripe_id: formattedData.id, 
+                    amount: formattedData.amount,
+                    currency: 'usd', 
+                    created: formattedData.timestamp, 
+                    payment_method: formattedData.payment_method, 
+                    customer_email: formattedData.billing_email, 
+                    location: `${formattedData.billing_line1} ${formattedData.billing_city}, ${formattedData.billing_state}, ${formattedData.billing_postal_code}`,
+                    name: formattedData.billiing_name
+                })
                 
                 break
     
