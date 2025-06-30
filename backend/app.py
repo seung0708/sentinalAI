@@ -3,11 +3,11 @@ import pandas as pd
 from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
 import json
 import joblib
-#from feature_engineering import
+import shap
 
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
-
+class_labels = {0: 'low', 1: 'medium', 2: 'high'}
 app = Flask(__name__)
 
 @app.route('/')
