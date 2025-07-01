@@ -7,7 +7,6 @@ import shap
 
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
-class_labels = {0: 'low', 1: 'medium', 2: 'high'}
 app = Flask(__name__)
 
 @app.route('/')
