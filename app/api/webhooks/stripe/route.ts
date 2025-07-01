@@ -25,6 +25,10 @@ export async function POST(req: NextRequest){
                 const {id, amount, created, customer, charges, status, payment_method_types} = paymentIntent
                 const chargesForPI = charges.data.filter(charge => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
+
+                const {data: history, error} = await supabase.from('transactions').select().eq('customer_id', customer)
+
+
                 const formattedData = {
                     id: id,
                     customer_id: customer,
