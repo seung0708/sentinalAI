@@ -21,28 +21,51 @@ export async function POST(req: NextRequest){
             // when event is payment_intent.succeded
             case 'payment_intent.succeeded':
                 const paymentIntent = event.data.object as Stripe.PaymentIntent
-
                 const {id, amount, created, customer, charges, status, payment_method_types} = paymentIntent
+
+                const {data: accountIdExistsInDb, error: accountError} = await supabase
+                    .from('connected_accounts')
+                    .select()
+                    .eq('account_id', event.account)
+                    .limit(1)
+                    .single()
+
+                if (accountError) {
+                    return NextResponse.json({ error: 'Database error', details: accountError }, { status: 500 });
+                }
+
+                const transactionExists = await supabase.from('transactions').select().eq('id', id)
+
+                if (transactionExists) {
+                    return NextResponse.json({message: 'Duplicate transaction', status: 200})
+                }
+
                 const chargesForPI = charges.data.filter(charge => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
 
-                const {data: history, error} = await supabase.from('transactions').select().eq('customer_id', customer)
-
-
-                const formattedData = {
+               const { data: transaction, error: transactionError } = await supabase
+                .from('transactions')
+                .insert({
                     id: id,
+                    account_id: accountIdExistsInDb.account_id,
                     customer_id: customer,
-                    timestamp: (new Date(created * 1000)).toISOString(),
-                    status,    
-                    amount: (amount / 100).toFixed(2), 
-                    billing_email: billing_details.email,
-                    billiing_name: billing_details?.name, 
-                    billing_phone: billing_details?.phone, 
-                    billing_line1: billing_details?.address?.line1, 
-                    billing_city: billing_details?.address?.city, 
-                    billing_state: billing_details?.address.state, 
-                    billing_postal_code: billing_details?.address.postal_code, 
-                    payment_method: payment_method_types[0]
+                    timestamp: new Date(created * 1000).toISOString(),
+                    amount: (amount / 100).toFixed(2),
+                    billing_email: billing_details?.email,
+                    billing_name: billing_details?.name,  // ✅ typo fixed
+                    billing_phone: billing_details?.phone,
+                    billing_line1: billing_details?.address?.line1,
+                    billing_city: billing_details?.address?.city,
+                    billing_state: billing_details?.address?.state,
+                    billing_postal_code: billing_details?.address?.postal_code,
+                    payment_method: payment_method_types?.[0]
+                })
+                .select()
+                .single()
+
+                if (transactionError) {
+                    console.error('Insert error:', transactionError);
+                    return NextResponse.json({ error: 'Transaction insert failed' }, { status: 500 });
                 }
                 
                 const data = await fetch('http://localhost:5000/predict-fraud', {
@@ -50,27 +73,11 @@ export async function POST(req: NextRequest){
                     headers: {
                         'Content-Type': 'application/json',    
                     },
-                    body: JSON.stringify(formattedData)
+                    body: JSON.stringify(transaction)
                 })
 
                 const result = await data.json()
                 console.log(result)
-
-                await supabase.from('transactions').insert({
-                    stripe_id: formattedData.id, 
-                    amount: formattedData.amount,
-                    currency: 'usd', 
-                    created: formattedData.timestamp, 
-                    payment_method: formattedData.payment_method, 
-                    customer_email: formattedData.billing_email, 
-                    location: `${formattedData.billing_line1} ${formattedData.billing_city}, ${formattedData.billing_state}, ${formattedData.billing_postal_code}`,
-                    name: formattedData.billiing_name, 
-                    risk_level_low: result.probabilities.low, 
-                    risk_level_med: result.probabilities.medium, 
-                    risk_level_high: result.probabilities.high,
-                    predicted_risk: result.predicted_risk, 
-                    
-                })
                 
                 break
     
