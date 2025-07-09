@@ -35,7 +35,6 @@ export async function POST(req: NextRequest){
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
-                console.log('transactionExists', transactionExists)
 
                 if (transactionExists) {
                     return NextResponse.json({message: 'Duplicate transaction', status: 200})
@@ -90,7 +89,10 @@ export async function POST(req: NextRequest){
                     probabilities: result.probabilities,
                     explanation: result.explanation, 
                     ...result.derived_features
-                })
+                    
+                }).eq('customer_id', customer)
+
+                console.log('update transaction error', updateTransactionsError)
                 
                 break
     

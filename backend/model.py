@@ -38,8 +38,6 @@ transactions_fe = add_amount_risk(transactions_fe)
 transactions_fe['overall_risk'] = (0.5 * transactions_fe['combined_frequency_risk'] + 0.3 * transactions_fe['combined_address_risk'] + 0.2 * transactions_fe['amount_risk_score'])
 #print(transactions_fe['overall_risk'].mean())
 
-print(transactions_fe) 
-
 def is_fraud(row):
     if row['overall_risk'] >= 0.5:
         return 2

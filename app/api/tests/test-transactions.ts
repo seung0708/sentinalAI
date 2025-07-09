@@ -28,7 +28,7 @@ interface TestDataItem {
 export const createPaymentIntent = async (accountId: string) => {
     const supabase = await createClient()
     const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Rachel Moon')
-    const {amount, currency, billing_details, payment_method} = transactions[1]
+    const {amount, currency, billing_details, payment_method} = transactions[0]
     let customer
     try{
         const customersList = await stripe.customers.list({
