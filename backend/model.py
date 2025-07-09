@@ -26,7 +26,7 @@ transactions_raw = pd.read_csv("D:\\programming\\projects\\sentinel-ai\\backend\
 transactions_fe = transactions_raw.copy()
 
 #convert timestamp column to datetime object
-transactions_fe['timestamp'] = pd.to_datetime(transactions_fe['timestamp'])
+transactions_fe['timestamp'] = pd.to_datetime(transactions_fe['timestamp'], format='ISO8601')
 
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
@@ -38,6 +38,7 @@ transactions_fe = add_amount_risk(transactions_fe)
 transactions_fe['overall_risk'] = (0.5 * transactions_fe['combined_frequency_risk'] + 0.3 * transactions_fe['combined_address_risk'] + 0.2 * transactions_fe['amount_risk_score'])
 #print(transactions_fe['overall_risk'].mean())
 
+print(transactions_fe) 
 
 def is_fraud(row):
     if row['overall_risk'] >= 0.5:
@@ -81,10 +82,10 @@ random_search.fit(X_train, y_train)
 
 #print best parameter after tuning
 best_model = random_search.best_estimator_
-#print(best_model)
+print(best_model)
 y_pred = best_model.predict(X_test)
 
-#print(classification_report(y_test, y_pred))
-#print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
 
 joblib.dump(best_model, 'fraud.pkl')

@@ -5,6 +5,9 @@ import json
 import joblib
 import shap
 
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
 app = Flask(__name__)
@@ -14,7 +17,6 @@ feature_columns = ['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
 def predict_fraud():
-    print(request.json)
     transactions = pd.DataFrame(request.json)
     transactions['timestamp'] = pd.to_datetime(transactions['timestamp'])
     transactions['amount'] = transactions['amount'].astype(float)
@@ -25,7 +27,29 @@ def predict_fraud():
     transactions = transactions.sort_values('timestamp', ascending=False).reset_index(drop=True)
     latest_tx = transactions.iloc[0]  # newest transaction
 
-    X = latest_tx[feature_columns]
+    int_features = [
+    'tx_count_last_5min', 'risk_fixed_5min', 'risk_combined_5min',
+    'tx_count_last_10min', 'risk_fixed_10min', 'risk_combined_10min',
+    'tx_count_last_30min', 'risk_fixed_30min', 'risk_combined_30min',
+    'tx_count_last_1h', 'risk_fixed_1h', 'risk_combined_1h',
+    'is_fake_street', 'is_fake_city'
+]
+
+    float_features = [
+        'avg_tx_last_5min', 'avg_tx_last_10min', 'avg_tx_last_30min', 'avg_tx_last_1h',
+        'combined_frequency_risk', 'fake_address_score', 'addr_change_score',
+        'combined_address_risk', 'avg_amount', 'amount_risk_score'
+    ]
+
+    for col in int_features:
+        val = pd.to_numeric(latest_tx[col], errors='coerce')
+        latest_tx[col] = int(0 if pd.isna(val) else val)
+
+    for col in float_features:
+        val = pd.to_numeric(latest_tx[col], errors='coerce')
+        latest_tx[col] = float(0.0 if pd.isna(val) else val)
+
+    X = pd.DataFrame([latest_tx[feature_columns]])
 
     model = joblib.load('model/fraud.pkl')
     print(model.classes_)
@@ -51,7 +75,7 @@ def predict_fraud():
         f"Base value: {base_value:.4f}\n"
         f"Top contributing features:\n- " + "\n- ".join(explanation_parts)
     )
-
+    print(explanation_text)
     # Package result
     response_data = {
         "predicted_risk": max(
