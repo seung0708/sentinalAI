@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
 import Stripe from 'stripe';
@@ -25,14 +26,15 @@ interface TestDataItem {
 }
 
 export const createPaymentIntent = async (accountId: string) => {
-    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tyler Fox')
-    console.log(transactions)
-    const {amount, currency, billing_details, payment_method} = transactions[0]
+    const supabase = await createClient()
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Rachel Moon')
+    const {amount, currency, billing_details, payment_method} = transactions[1]
     let customer
     try{
         const customersList = await stripe.customers.list({
             stripeAccount: accountId
         })
+
         const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details.name)
 
         if (!testTransactionCustomer[0]?.id) {
@@ -94,14 +96,3 @@ export const createPaymentIntent = async (accountId: string) => {
         console.error("Error creating payment Intent", error)
     }
 }
-
-// export const generatePaymentIntents = async ( accountId: string) =>{
-//     const transactions = testData.filter(transaction => transaction.billing_details?.name == 'John Kim')
-//     const results = []
-//     for (let i = 0; i < transactions.length; i++){
-//         const payment = await createPaymentIntent(accountId, transactions[i])
-//         if(!payment) throw new Error('Error when creating payment')
-//         results.push(payment);
-//     }
-//     return results
-// }

@@ -3,7 +3,6 @@ import re
 
 
 def add_combined_frequency_risk(df, intervals, fixed_thresholds, weight=3):
-
     # sorts the intervals list to shortest first
     # Timedelta converts the string into actual time objects in order to sort the list (i.e. 5min -> 0 days 00:05:00)
     # doing this so we can catch suspicious activity as soon as they happen

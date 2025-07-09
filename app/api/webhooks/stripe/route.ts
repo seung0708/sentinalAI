@@ -29,8 +29,6 @@ export async function POST(req: NextRequest){
                     .limit(1)
                     .single()
 
-                console.log('accountIdExistsInDb', accountIdExistsInDb)
-
                 if (accountError) {
                     return NextResponse.json({ error: 'Database error', details: accountError }, { status: 500 });
                 }

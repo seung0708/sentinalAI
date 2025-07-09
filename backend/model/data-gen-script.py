@@ -76,22 +76,31 @@ def generate_transactions(business_size='small', fraud_customer_rate=0.1, days=3
 
         transaction_times = []
 
-        for _ in range(txn_count):
-            r = random.random()
-            if r < 0.7:
-                hour = random.randint(8, 20)   # normal hours
-            elif r < 0.9:
-                hour = random.randint(21, 23)  # late night
-            else:
-                hour = random.randint(0, 5)    # early morning
+        if is_fraud_customer:
+            # Generate clustered transactions for fraud customers: 
+            # pick a random start time within the last `days`, then add txn_count minutes sequentially
+            start_offset_minutes = random.randint(0, days * 24 * 60)
+            start_time = now - timedelta(minutes=start_offset_minutes)
+            for i in range(txn_count):
+                txn_time = start_time + timedelta(minutes=i)  # 1-minute apart transactions
+                transaction_times.append(txn_time)
+        else:
+            # For non-fraud customers, generate spread out transactions as before
+            for _ in range(txn_count):
+                r = random.random()
+                if r < 0.7:
+                    hour = random.randint(8, 20)   # normal hours
+                elif r < 0.9:
+                    hour = random.randint(21, 23)  # late night
+                else:
+                    hour = random.randint(0, 5)    # early morning
 
-            minutes_offset = random.randint(0, days * 24 * 60)
-            intervals = random.choice([5, 10, 30])
-            aligned_minutes = (minutes_offset // intervals) * intervals
-            txn_time = now - timedelta(minutes=aligned_minutes)
-            txn_time = txn_time.replace(hour=hour, minute=txn_time.minute, second=txn_time.second, microsecond=0)
-
-            transaction_times.append(txn_time)
+                minutes_offset = random.randint(0, days * 24 * 60)
+                intervals = random.choice([5, 10, 30])
+                aligned_minutes = (minutes_offset // intervals) * intervals
+                txn_time = now - timedelta(minutes=aligned_minutes)
+                txn_time = txn_time.replace(hour=hour, minute=txn_time.minute, second=txn_time.second, microsecond=0)
+                transaction_times.append(txn_time)
         
         transaction_times.sort()
         default_addr = default_addresses[customer_id]
