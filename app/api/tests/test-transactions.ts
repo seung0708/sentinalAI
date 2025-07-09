@@ -3,8 +3,6 @@ import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
 import Stripe from 'stripe';
 
-
-
 interface TestDataItem {
     amount: number, 
     currency: string, 
@@ -27,8 +25,9 @@ interface TestDataItem {
 }
 
 export const createPaymentIntent = async (accountId: string) => {
-    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'John Kim')
-    const {amount, currency, billing_details, payment_method} = transactions[1]
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tyler Fox')
+    console.log(transactions)
+    const {amount, currency, billing_details, payment_method} = transactions[0]
     let customer
     try{
         const customersList = await stripe.customers.list({
