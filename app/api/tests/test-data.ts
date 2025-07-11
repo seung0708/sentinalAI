@@ -1,5 +1,4 @@
 export const testData = [
-  // ✅ NORMAL CUSTOMER: John Kim — consistent billing info, 1 outlier in amount
   {
     amount: 3200,
     currency: 'usd',
@@ -109,6 +108,64 @@ export const testData = [
     },
     status: 'succeeded',
     payment_method: { type: 'card', token: 'tok_mastercard' },
+  },
+   // LOW FRAUD RISK: Emily Grant — consistent info, spaced out txns
+  {
+    amount: 1000,
+    currency: 'usd',
+    billing_details: {
+      name: 'Emily Grant',
+      email: 'emily.grant@example.com',
+      phone: '+1-555-1010',
+      address: {
+        line1: '101 Elm Street',
+        city: 'New York',
+        state: 'NY',
+        postal_code: '10001',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+    created_at: '2025-07-01T10:00:00Z',
+  },
+  {
+    amount: 1200,
+    currency: 'usd',
+    billing_details: {
+      name: 'Emily Grant',
+      email: 'emily.grant@example.com',
+      phone: '+1-555-1010',
+      address: {
+        line1: '101 Elm Street',
+        city: 'New York',
+        state: 'NY',
+        postal_code: '10001',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+    created_at: '2025-07-03T14:00:00Z',
+  },
+  {
+    amount: 1100,
+    currency: 'usd',
+    billing_details: {
+      name: 'Emily Grant',
+      email: 'emily.grant@example.com',
+      phone: '+1-555-1010',
+      address: {
+        line1: '101 Elm Street',
+        city: 'New York',
+        state: 'NY',
+        postal_code: '10001',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+    created_at: '2025-07-05T09:30:00Z',
   },
 
   //FRAUD CUSTOMER: Tyler Fox — mismatched billing
@@ -375,4 +432,121 @@ export const testData = [
     status: 'succeeded',
     payment_method: { type: 'card', token: 'tok_visa' },
   },
-]
+  // MEDIUM FRAUD RISK: David Lee — billing city variation & rapid txns
+  {
+    amount: 3500,
+    currency: 'usd',
+    billing_details: {
+      name: 'David Lee',
+      email: 'david.lee@example.com',
+      phone: '+1-555-3030',
+      address: {
+        line1: '88 Pine Street',
+        city: 'San Francisco',
+        state: 'CA',
+        postal_code: '94102',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+    created_at: '2025-07-10T09:00:00Z',
+  },
+  {
+    amount: 4200,
+    currency: 'usd',
+    billing_details: {
+      name: 'David Lee',
+      email: 'david.lee@example.com',
+      phone: '+1-555-3030',
+      address: {
+        line1: '88 Pine Street',
+        city: 'Oakland', // nearby different city — suspicious
+        state: 'CA',
+        postal_code: '94607',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+    created_at: '2025-07-10T09:10:00Z',
+  },
+  {
+    amount: 4000,
+    currency: 'usd',
+    billing_details: {
+      name: 'David Lee',
+      email: 'david.lee@example.com',
+      phone: '+1-555-3030',
+      address: {
+        line1: '88 Pine Street',
+        city: 'San Francisco',
+        state: 'CA',
+        postal_code: '94102',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+    created_at: '2025-07-10T09:20:00Z',
+  },
+
+  //HIGH FRAUD RISK: Sophia Martinez — fake/unknown billing addresses & rapid txns
+  {
+    amount: 9000,
+    currency: 'usd',
+    billing_details: {
+      name: 'Sophia Martinez',
+      email: 'sophia.fake@mailinator.com',
+      phone: '+1-555-7070',
+      address: {
+        line1: '777 Phantom Road',
+        city: 'Unknown',
+        state: 'ZZ',
+        postal_code: '00000',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+    created_at: '2025-07-15T11:00:00Z',
+  },
+  {
+    amount: 8500,
+    currency: 'usd',
+    billing_details: {
+      name: 'Sophia Martinez',
+      email: 'sophia.fake@mailinator.com',
+      phone: '+1-555-7070',
+      address: {
+        line1: '123 Mystery Ln',
+        city: 'Nowhere',
+        state: 'ZZ',
+        postal_code: '00000',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+    created_at: '2025-07-15T11:02:00Z',
+  },
+  {
+    amount: 8700,
+    currency: 'usd',
+    billing_details: {
+      name: 'Sophia Martinez',
+      email: 'sophia.fake@mailinator.com',
+      phone: '+1-555-7070',
+      address: {
+        line1: '999 Nowhere Blvd',
+        city: 'Unknown',
+        state: 'ZZ',
+        postal_code: '00000',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+    created_at: '2025-07-15T11:04:00Z',
+  },
+];

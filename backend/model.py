@@ -12,7 +12,7 @@ from sklearn.metrics import (
     average_precision_score
 )
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split,RandomizedSearchCV 
+from sklearn.model_selection import train_test_split,RandomizedSearchCV, GroupShuffleSplit 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -49,10 +49,13 @@ def is_fraud(row):
 transactions_fe['is_fraud'] = transactions_fe.apply(is_fraud, axis=1)
 #print(transactions_fe.head())
 
-X = transactions_fe[['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score']]
+X = transactions_fe[['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk']]
 y = transactions_fe["is_fraud"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2, random_state=42)
+gss = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+for train_idx, test_idx in gss.split(X, y, groups=transactions_fe['customer_id']):
+    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
 
 # hyperparameter grid for xboost
 param_dist = {
@@ -80,7 +83,7 @@ random_search.fit(X_train, y_train)
 
 #print best parameter after tuning
 best_model = random_search.best_estimator_
-print(best_model)
+print(best_model.get_booster().feature_names)
 y_pred = best_model.predict(X_test)
 
 print(classification_report(y_test, y_pred))
