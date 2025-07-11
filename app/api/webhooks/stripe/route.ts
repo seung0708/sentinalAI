@@ -89,7 +89,9 @@ export async function POST(req: NextRequest){
                     explanation: result.explanation, 
                     ...result.derived_features
                     
-                }).eq('customer_id', customer)
+                })
+                .eq('customer_id', customer)
+                .eq('stripe_id', id)
 
                 console.log('update transaction error', updateTransactionsError)
                 
