@@ -7,8 +7,14 @@ import os
 from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
 from flask import Flask, request, jsonify
 from llama_index.core import Document, SupabaseVectorStore
+from supabase import create_client, Client
 
 api_key = os.getenv('OPENAI_API_KEY')
+
+url = os.environ('NEXT_PUBLIC_SUPABASE_URL')
+key = os.environ('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+supabase = create_client(url, key)
+
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -100,6 +106,18 @@ def predict_fraud():
     }
 
     return jsonify(response_data)
+
+@app.route('/index-transactions', methods=['post'])
+def index_transactions():
+    response = (
+        supabase.table('transactions')
+        .select('*')
+        .execute()
+    )
+
+    transactions = response.data 
+
+    
 
 
 if __name__ == '__main__':

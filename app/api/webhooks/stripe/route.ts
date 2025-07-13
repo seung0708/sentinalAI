@@ -95,6 +95,14 @@ export async function POST(req: NextRequest){
                 .eq('stripe_id', id)
 
                 console.log('update transaction error', updateTransactionsError)
+
+                const indexTransactions = await fetch('http://localhost:5000/index-transactions', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactions)
+                })
                 
                 break
     
