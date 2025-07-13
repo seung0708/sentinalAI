@@ -1,9 +1,14 @@
-from flask import Flask, request, jsonify
+
 import pandas as pd
-from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
-import json
 import joblib
 import shap
+import os 
+
+from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
+from flask import Flask, request, jsonify
+from llama_index.core import Document, SupabaseVectorStore
+
+api_key = os.getenv('OPENAI_API_KEY')
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
