@@ -9,7 +9,7 @@ from flask import Flask, request, jsonify
 from llama_index.core import Document, SupabaseVectorStore
 from supabase import create_client, Client
 
-api_key = os.getenv('OPENAI_API_KEY')
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
 url = os.environ('NEXT_PUBLIC_SUPABASE_URL')
 key = os.environ('NEXT_PUBLIC_SUPABASE_ANON_KEY')
@@ -117,7 +117,7 @@ def index_transactions():
 
     transactions = response.data 
 
-    
+    for 
 
 
 if __name__ == '__main__':
