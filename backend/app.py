@@ -109,15 +109,21 @@ def predict_fraud():
 
 @app.route('/index-transactions', methods=['post'])
 def index_transactions():
-    response = (
-        supabase.table('transactions')
-        .select('*')
-        .execute()
-    )
+    transactions = request.json
 
-    transactions = response.data 
+    for transaction in transactions: 
+        if transaction.predicted_risk == 'high' or transaction.predict_risk == 'medium':
+            text = f'Transaction {transaction.stripe_id} for {transaction.billing_name} has a {transaction.predicted_risk} risk of being fraud because '
+            if transaction.combined_frequency_risk >= 0.5: 
+                if transaction.tx_count_last_5min >= 3:
+                    text += f'customer purchased {transaction.tx_count_last_5min} within 5 minutes.'
+                elif transaction.tx_count_last_10min >= 4:
+                    text += f'customer purchased {transaction.tx_count_last_5min} within 10 minutes.'
+                elif transaction.tx_count_last_30min >= 5: 
+                    text += f'customer purchased {transaction.tx_count_last_5min} within 30 minutes.'
+                
+            
 
-    for 
 
 
 if __name__ == '__main__':

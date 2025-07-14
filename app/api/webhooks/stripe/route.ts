@@ -84,7 +84,7 @@ export async function POST(req: NextRequest){
                 const result = await data.json()
                 console.log(result)
 
-                const {error: updateTransactionsError} = await supabase.from('transactions').update({
+                const {data: updateTransactions, error: updateTransactionsError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
                     probabilities: result.probabilities,
                     explanation: result.explanation, 
@@ -93,6 +93,7 @@ export async function POST(req: NextRequest){
                 })
                 .eq('customer_id', customer)
                 .eq('stripe_id', id)
+                .select()
 
                 console.log('update transaction error', updateTransactionsError)
 
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest){
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(transactions)
+                    body: JSON.stringify(updateTransactions)
                 })
                 
                 break
