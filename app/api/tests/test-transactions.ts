@@ -27,7 +27,7 @@ interface TestDataItem {
 
 export const createPaymentIntent = async (accountId: string) => {
     const supabase = await createClient()
-    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'David Lee')
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Sophia Martinez')
     const {amount, currency, billing_details, payment_method} = transactions[2]
     let customer
     try{

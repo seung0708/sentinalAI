@@ -2,14 +2,35 @@
 import pandas as pd
 import joblib
 import shap
+import os 
 from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
 from flask import Flask, request, jsonify
 
-from generate_index import embed_index_transactions
+from index_utils import create_transaction_documents
 from llama_index.core import Settings
 from llama_index.embeddings.openai import OpenAIEmbedding
 
-Settings.embed_model = OpenAIEmbedding()
+from dotenv import load_dotenv
+from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.vector_stores.supabase import SupabaseVectorStore
+from supabase import create_client, Client
+
+load_dotenv()
+
+openai_api_key = os.getenv('OPENAI_API_KEY')
+url = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
+key = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+
+supabase = create_client(url, key)
+
+Settings.embed_model = OpenAIEmbedding(api_key=openai_api_key)
+
+vector_store = SupabaseVectorStore(
+    postgres_connection_string = f"postgresql://{os.environ['CONNECTION_STRING_USER']}:{os.environ['CONNECTION_STRING_PASSWORD']}@{os.environ['CONNECTION_STRING_HOST']}.supabase.co:{os.environ['CONNECTION_STRING_PORT']}/postgres",
+    collection_name='transactions_embeddings',
+)
+
+storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -17,6 +38,7 @@ pd.set_option('display.max_columns', None)
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
 app = Flask(__name__)
+index = None
 
 feature_columns = ['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk']
 
@@ -34,7 +56,7 @@ def predict_fraud():
         0.3 * transactions['combined_address_risk'] +
         0.2 * transactions['amount_risk_score']
     )
-    print(transactions)
+    #print(transactions)
     transactions = transactions.sort_values('timestamp', ascending=False).reset_index(drop=True)
     latest_tx = transactions.iloc[0]  # newest transaction
 
@@ -104,11 +126,20 @@ def predict_fraud():
 
 @app.route('/index-transactions', methods=['post'])
 def index_transactions():
-    transactions = request.json
-    embed_index_transactions(transactions)
-    return jsonify({'message': 'Embedded and Indexed to LlamaIndex'}), 200
-
-
+    global index
+    try:
+    
+        transactions = request.json
+        
+        docs = create_transaction_documents(transactions)
+        index = VectorStoreIndex.from_documents(documents=docs, storage_context=storage_context, embed_model=Settings.embed_model)
+        storage_context.persist()
+        print("Docs in index after from_documents:", len(index.docstore.docs))
+        print("Stored doc keys:", index.docstore.docs.keys())
+        print(f"Number of docs indexed: {len(index.docstore.docs)}")
+        return jsonify({'message': 'Embedded and Indexed to LlamaIndex'}), 200
+    except Exception as e: 
+        print("Indexing error: ", e)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
