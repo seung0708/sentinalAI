@@ -82,28 +82,32 @@ export async function POST(req: NextRequest){
                 })
 
                 const result = await data.json()
-                console.log(result)
+                //console.log(result)
 
-                const {data: updateTransactions, error: updateTransactionsError} = await supabase.from('transactions').update({
+                const {data: updateTransaction, error: updateTransactionError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
                     probabilities: result.probabilities,
                     explanation: result.explanation, 
                     ...result.derived_features
                     
                 })
-                .eq('customer_id', customer)
                 .eq('stripe_id', id)
+                .order('timestamp', { ascending: false }) 
+                .limit(1)
                 .select()
+                console.log('update transaction error', updateTransactionError)
 
-                console.log('update transaction error', updateTransactionsError)
 
-                const indexTransactions = await fetch('http://localhost:5000/index-transactions', {
+
+                const indexTransaction = await fetch('http://localhost:5000/index-transaction', {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(updateTransactions)
+                    body: JSON.stringify(updateTransaction?.[0])
                 })
+
+                console.log(indexTransaction)
                 
                 break
     
