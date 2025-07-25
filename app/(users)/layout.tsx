@@ -1,20 +1,18 @@
 import { AppSidebar } from "@/app/components/users/Sidebar";
-import {SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { SiteHeader } from "@/app/components/users/site-header";
 
 export default function UserLayout({children}: {children: React.ReactNode}) {
     return (
-        <div>
-            <main>
+        <div className="relative flex min-h-screen">
             <SidebarProvider>
                 <AppSidebar />
-                <SidebarInset>
+                <div className="flex-1 overflow-hidden px-2">
                     <SiteHeader />
                     {children}
-                </SidebarInset>
+                </div>
             </SidebarProvider>
-            </main>
         </div>
     )
 }
