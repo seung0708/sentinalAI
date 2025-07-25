@@ -1,8 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-
-import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { SiteUser } from "./site-user"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -25,7 +23,7 @@ export function SiteHeader() {
                 <BreadcrumbItem key={name}>
                   
                   {isLast ? (
-                    <span className="text-muted-foreground">
+                    <span className="">
                       {decodeURIComponent(name.charAt(0).toUpperCase() + name.slice(1)).replace(/-/g, ' ')}
                     </span>
                   ) : (

@@ -56,7 +56,7 @@ export function Chart() {
             <CardHeader className="relative">
                 <CardDescription>
                     <span className="@[540px]/card:block hidden">
-                        Total for the last 3 months
+                        Recent High-Risk Transactions
                     </span>
                     <span className="@[540px]/card:hidden">Last 3 months</span>
                 </CardDescription>
