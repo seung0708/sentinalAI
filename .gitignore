@@ -52,3 +52,4 @@ venv
 
 /backend/storage
 /backend/model
+/backend/__pycache__
