@@ -3,17 +3,19 @@ import pandas as pd
 import joblib
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from pathlib import Path
 from supabase import create_client
 
 from transaction_processing import process_stripe_transaction, generate_explanation
 from llama_indexing import TransactionProcessor
 from lang_chain import TransactionChatBot
 
-load_dotenv()
+load_dotenv(dotenv_path="../.env.local")
 
 url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 openai_api_key= os.getenv('OPENAI_API_KEY')
+
 
 supabase = create_client(url, key)
 
@@ -21,6 +23,10 @@ app = Flask(__name__)
 
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
+
+# response = supabase.table('transactions').select('*').execute()
+# data=response.data
+# print(data)
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
