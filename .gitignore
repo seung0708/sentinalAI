@@ -49,6 +49,9 @@ venv
 #pkl
 *.pkl
 
+__pycache__/
+*.pyc
+
 
 /backend/storage
 /backend/model
