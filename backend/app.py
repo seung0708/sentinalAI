@@ -6,6 +6,9 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 from supabase import create_client
+import joblib
+import pandas as pd
+from supabase import create_client
 from dotenv import load_dotenv
 import os
 
@@ -29,13 +32,11 @@ CORS(app)
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
 
-<<<<<<< Updated upstream
 # response = supabase.table('transactions').select('*').execute()
 # data=response.data
 # print(data)
-=======
+
 model = joblib.load('model/fraud_models.joblib')
->>>>>>> Stashed changes
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
