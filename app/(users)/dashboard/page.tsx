@@ -8,13 +8,15 @@ import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SiteHeader } from "@/app/components/users/site-header";
-import BottomNav from "@/app/components/users/bottom-nav";
+import BottomNav from "@/app/components/users/BottomChatBanner";
+import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
 
 export default function Dashboard() {
     const router = useRouter()
 
     const[ isChatOpen, setIsChatOpen ] =  useState(false);
+
     useEffect(() => {
         const getUser = async () => {
             const response = await fetch('/api/user')
@@ -42,7 +44,10 @@ export default function Dashboard() {
                 
             </div>
         </div>
-        <BottomNav onChatClick={handleClick}></BottomNav>
+        <ChatBotContainer 
+            isChatOpen={isChatOpen} 
+            onChatClick={handleClick}>
+        </ChatBotContainer>
     </div>
     )
 }
