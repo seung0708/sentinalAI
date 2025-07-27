@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type Message = {
     text: string, 
@@ -14,11 +14,18 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
     const [ messages, setMessage ] = useState<Message[]>([]);
     const [ input, setInput ] = useState("")
 
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
+    }, [messages]);
+
     const handleSend = async () => {
         
         if (!input.trim()) return;
 
         const userMsg = { sender: 'user', text: input};
+        setInput('');
         setMessage(prev => [...prev, userMsg]);
 
         try {
@@ -41,20 +48,19 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
 
         }
 
-        setInput('');
     }
 
     return (
 
         <div className="fixed bottom-6 right-2 w-md h-1/2 
             bg-white border border-gray-300 rounded-lg 
-            shadow-md z-40">
+            shadow-md z-40 flex flex-col">
 
             { /* header*/ }
             <h3 className="p-4 text-lg fonr-semibold border-b border-green-700 text-green-700"> Chat Window</h3>
 
            {/** Messages Containerd */}
-            <div className="chat-box overflow-y-scroll">
+            <div className="flex-1 overflow-y-scroll px-4 py-2">
             {
                 messages.map((msg, index) => (
                     <div key={index} className={msg.sender === 'user' ? 'text-right' : 'text-left'}>
@@ -62,23 +68,26 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
                   </div>
                 ))
             }
+            <div ref={messagesEndRef}></div>
             </div>
 
             {/** Input */}
 
-            <div>
-                <input 
-                    type="text"
-                    className="w-full border p-2 text-green-700"
-                    placeholder="Type your message..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}    
-                />
+            <div className="p-2 border-t border-gray-300">
+                <div className="flex">
+                    <input 
+                        type="text"
+                        className="w-full border p-2 text-green-700"
+                        placeholder="Type your message..."
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}    
+                    />
 
-                <button
-                    onClick={handleSend}
-                    className="bg-blue-500 text-white m-1 px-3 py-1 rounded-md text-sm hover:bg-blue-600">Send
-                </button>
+                    <button
+                        onClick={handleSend}
+                        className="bg-blue-500 text-white m-1 px-3 py-1 rounded-md text-sm hover:bg-blue-600">Send
+                    </button>
+                </div>
             </div>
         </div> 
     )
