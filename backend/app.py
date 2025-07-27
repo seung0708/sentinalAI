@@ -3,24 +3,32 @@ import pandas as pd
 import joblib
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from pathlib import Path
 from supabase import create_client
+from flask_cors import CORS 
 
 from transaction_processing import process_stripe_transaction, generate_explanation
 from llama_indexing import TransactionProcessor
 from lang_chain import TransactionChatBot
 
-load_dotenv()
+load_dotenv(dotenv_path="../.env.local")
 
 url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 openai_api_key= os.getenv('OPENAI_API_KEY')
 
+
 supabase = create_client(url, key)
 
 app = Flask(__name__)
+CORS(app)
 
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
+
+# response = supabase.table('transactions').select('*').execute()
+# data=response.data
+# print(data)
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
@@ -44,8 +52,13 @@ def index_transaction():
 
 
 
-@app.route('/chat', methods=['POST'])
+@app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
+
+    if request.method == 'OPTIONS':
+        # CORS preflight request
+        return jsonify({}), 200
+
     data = request.json
     query = data.get("query")
     account_id = data.get("account_id")
@@ -58,4 +71,4 @@ def chat():
     return chatbot.chat(query, account_id)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8000)

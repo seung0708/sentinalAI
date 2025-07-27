@@ -4,15 +4,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Chart } from "@/app/components/users/Chart";
-import { DataTable } from "@/app/components/users/datatable/DataTable";
+import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SiteHeader } from "@/app/components/users/site-header";
+import BottomNav from "@/app/components/users/BottomChatBanner";
+import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
 
 export default function Dashboard() {
     const [transactions, setTransactions] = useState([])
     const router = useRouter()
+
+    const[ isChatOpen, setIsChatOpen ] =  useState(false);
 
     useEffect(() => {
         const getUser = async () => {
@@ -30,6 +34,10 @@ export default function Dashboard() {
         getUser()
     }, [])
 
+    const handleClick = () => {
+        setIsChatOpen(!isChatOpen)
+    }
+
     return (
         <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
@@ -41,6 +49,10 @@ export default function Dashboard() {
                 
             </div>
         </div>
+        <ChatBotContainer 
+            isChatOpen={isChatOpen} 
+            onChatClick={handleClick}>
+        </ChatBotContainer>
     </div>
     )
 }
