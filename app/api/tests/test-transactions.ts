@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
-import Stripe from 'stripe';
 
 interface TestDataItem {
     amount: number, 
@@ -27,22 +26,22 @@ interface TestDataItem {
 
 export const createPaymentIntent = async (accountId: string) => {
     const supabase = await createClient()
-    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Sophia Martinez')
-    const {amount, currency, billing_details, payment_method} = transactions[2]
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tessa Morgan')
+    const {amount, currency, billing_details, payment_method} = transactions[0]
     let customer
     try{
         const customersList = await stripe.customers.list({
             stripeAccount: accountId
         })
 
-        const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details.name)
+        const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details?.name)
 
         if (!testTransactionCustomer[0]?.id) {
             const createCustomer = await stripe.customers.create({
-                name: billing_details.name,
-                email: billing_details.email,
-                phone: billing_details.phone, 
-                address: billing_details.address
+                name: billing_details?.name,
+                email: billing_details?.email,
+                phone: billing_details?.phone, 
+                address: billing_details?.address
             }, {
                 stripeAccount: accountId
             })
@@ -57,7 +56,7 @@ export const createPaymentIntent = async (accountId: string) => {
 
         const paymentMethod = await stripe.paymentMethods.create({
             type: 'card',
-            card: {token: payment_method.token}, //using the test visa card
+            card: {token: payment_method?.token}, //using the test visa card
             billing_details: billing_details
         }, {
             stripeAccount: accountId

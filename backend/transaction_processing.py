@@ -1,87 +1,96 @@
 import pandas as pd
 
-import shap
+from model.feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
+from supabase import create_client
+from dotenv import load_dotenv
+import os
 
-from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
+load_dotenv()
+
+url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
-feature_columns = ['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk']
-intervals = ['5min', '10min', '30min', '1h']
-fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
+feature_columns = [
+    'tx_count_last_5min', 'tx_count_last_10min', 'tx_count_last_30min', 'tx_count_last_1h',
+    'combined_frequency_risk', 'fake_address_score', 'addr_change_score', 'combined_address_risk',
+    'avg_amount', 'amount_risk_score', 'fake_component_count'
+]
 
-
-def process_stripe_transaction(request_data):
-    transactions = pd.DataFrame(request_data)
+def process_transaction(request_data):
+    # Handle both list and dictionary inputs
+    if isinstance(request_data, list):
+        current_tx = pd.DataFrame(request_data)
+    else:
+        current_tx = pd.DataFrame([request_data])
+    
+    # Add timestamp if not present
+    if 'timestamp' not in current_tx.columns:
+        current_tx['timestamp'] = pd.Timestamp.now()
+    
+    # Use customer_id from data or fallback to billing_name
+    if 'customer_id' not in current_tx.columns:
+        current_tx['customer_id'] = current_tx.get('customer', current_tx['billing_name'])
+    
+    # Get transaction history from Supabase if we have customer_id
+    customer_id = current_tx['customer_id'].iloc[0]
+    if customer_id and customer_id != 'unknown':
+        supabase = create_client(url, key)
+        history = supabase.table('transactions').select('*').eq('customer_id', customer_id).execute()
+        history_df = pd.DataFrame(history.data)
+        
+        if len(history_df) > 0:
+            # Check if current transaction is already in history
+            current_stripe_id = current_tx['stripe_id'].iloc[0]
+            if current_stripe_id in history_df['stripe_id'].values:
+                # Use history as is since it already includes current transaction
+                transactions = history_df
+            else:
+                # Combine history with current transaction
+                transactions = pd.concat([history_df, current_tx], ignore_index=True)
+        else:
+            transactions = current_tx
+    else:
+        transactions = current_tx
+    
+    # Ensure all required columns exist
     transactions['timestamp'] = pd.to_datetime(transactions['timestamp'])
-    transactions['amount'] = transactions['amount'].astype(float)
-    transactions = add_combined_frequency_risk(transactions, intervals, fixed_thresholds)
+    transactions['amount'] = pd.to_numeric(transactions['amount'], errors='coerce')
+    transactions['customer_id'] = transactions['customer_id'].fillna('unknown')
+    
+    # Process features
+    transactions = add_combined_frequency_risk(transactions)
     transactions = add_address_risk(transactions)
     transactions = add_amount_risk(transactions)
-    transactions['overall_risk'] = (
-        0.5 * transactions['combined_frequency_risk'] +
-        0.3 * transactions['combined_address_risk'] +
-        0.2 * transactions['amount_risk_score']
-    )
-    #print(transactions)
+    
     transactions = transactions.sort_values('timestamp', ascending=False).reset_index(drop=True)
     latest_tx = transactions.iloc[0]  # newest transaction
-
-    int_features = [
-    'tx_count_last_5min', 'risk_fixed_5min', 'risk_combined_5min',
-    'tx_count_last_10min', 'risk_fixed_10min', 'risk_combined_10min',
-    'tx_count_last_30min', 'risk_fixed_30min', 'risk_combined_30min',
-    'tx_count_last_1h', 'risk_fixed_1h', 'risk_combined_1h',
-    'is_fake_street', 'is_fake_city'
-    ]
-
-    float_features = [
-        'avg_tx_last_5min', 'avg_tx_last_10min', 'avg_tx_last_30min', 'avg_tx_last_1h',
-        'combined_frequency_risk', 'fake_address_score', 'addr_change_score',
-        'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk'
-    ]
-
-    for col in int_features:
-        val = pd.to_numeric(latest_tx[col], errors='coerce')
-        latest_tx[col] = int(0 if pd.isna(val) else val)
-
-    for col in float_features:
-        val = pd.to_numeric(latest_tx[col], errors='coerce')
-        latest_tx[col] = float(0.0 if pd.isna(val) else val)
-
-    X = pd.DataFrame([latest_tx[feature_columns]])
-
-    return X, latest_tx
+    
+    # Convert types for our current feature set
+    for col in feature_columns:
+        if col in ['tx_count_last_5min', 'tx_count_last_10min', 'tx_count_last_30min', 'tx_count_last_1h', 'fake_component_count']:
+            val = pd.to_numeric(latest_tx[col], errors='coerce')
+            latest_tx[col] = int(0 if pd.isna(val) else val)
+        else:
+            val = pd.to_numeric(latest_tx[col], errors='coerce')
+            latest_tx[col] = float(0.0 if pd.isna(val) else val)
+            
+    return transactions[feature_columns], latest_tx
 
 
-def generate_explanation(X, latest_tx, model, pred_class_index, prediction):
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X)
-    #print(shap_values)
-    row_values = shap_values[0, :, pred_class_index]
-    base_value = explainer.expected_value[pred_class_index]
-
-    explanation_parts = []
-    for feature, shap_val in sorted(zip(X.columns, row_values), key=lambda x: abs(x[1]), reverse=True)[:3]:
-        sign = "+" if shap_val >= 0 else "-"
-        explanation_parts.append(f"{feature} contributed {sign}{abs(shap_val):.3f}")
-
-    explanation_text = (
-        f"Model prediction (probabilities): {prediction.tolist()}\n"
-        f"Base value: {base_value:.4f}\n"
-        f"Top contributing features:\n- " + "\n- ".join(explanation_parts)
-    )
-
+def format_risk_assessment(X, latest_tx, model=None, pred_class_index=None, prediction=None):
+    # Get predicted risk level from probabilities
+    risk_probs = list(zip(['low', 'medium', 'high'], prediction[0]))
+    predicted_risk = max(risk_probs, key=lambda x: x[1])[0]
+    
     return {
-        "predicted_risk": max(
-            zip(["low", "medium", "high"], prediction[0]), key=lambda x: x[1]
-        )[0],
+        "predicted_risk": predicted_risk,
         "probabilities": {
-            "low": round(float(prediction[0][0]), 2),
-            "medium": round(float(prediction[0][1]), 2),
-            "high": round(float(prediction[0][2]), 2),
+            "low": float(prediction[0][0]),
+            "medium": float(prediction[0][1]),
+            "high": float(prediction[0][2])
         },
-        "explanation": explanation_text,
-        "derived_features": {col: latest_tx[col] for col in feature_columns}
+        "derived_features": {col: float(latest_tx[col]) if col not in ['tx_count_last_5min', 'tx_count_last_10min', 'tx_count_last_30min', 'tx_count_last_1h', 'fake_component_count'] else int(latest_tx[col]) for col in feature_columns}
     }

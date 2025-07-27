@@ -1,15 +1,18 @@
-import os 
-import pandas as pd
-import joblib
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from pathlib import Path
 from supabase import create_client
 from flask_cors import CORS 
+import joblib
+import pandas as pd
+from supabase import create_client
+from dotenv import load_dotenv
+import os
 
-from transaction_processing import process_stripe_transaction, generate_explanation
-from llama_indexing import TransactionProcessor
-from lang_chain import TransactionChatBot
+from transaction_processing import process_transaction, format_risk_assessment
+from langchain_llama.llama_indexing import TransactionProcessor
+from langchain_llama.lang_chain import TransactionChatBot
+from inference.predict import predict_risk
 
 load_dotenv(dotenv_path="../.env.local")
 
@@ -26,21 +29,26 @@ CORS(app)
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
 
+<<<<<<< Updated upstream
 # response = supabase.table('transactions').select('*').execute()
 # data=response.data
 # print(data)
+=======
+model = joblib.load('model/fraud_models.joblib')
+>>>>>>> Stashed changes
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
 def predict_fraud():
-    X, latest_tx = process_stripe_transaction(request.json)
-    model = joblib.load('model/fraud.pkl')
-
-    prediction = model.predict_proba(X)
-
+    # Process transaction and get features
+    X, latest_tx = process_transaction(request.json)  # Unpack both return values
+    
+    # Get prediction
+    prediction = predict_risk(X, model)
+    
     pred_class_index = prediction.argmax()
-    response_data = generate_explanation(X, latest_tx, model, pred_class_index, prediction)
-
+    response_data = format_risk_assessment(X, latest_tx, model['final'], pred_class_index, prediction)
+    print(response_data)
     return jsonify(response_data)
 
 @app.route('/index-transaction', methods=['POST'])

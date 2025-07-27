@@ -87,9 +87,7 @@ export async function POST(req: NextRequest){
                 const {data: updateTransaction, error: updateTransactionError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
                     probabilities: result.probabilities,
-                    explanation: result.explanation, 
                     ...result.derived_features
-                    
                 })
                 .eq('stripe_id', id)
                 .order('timestamp', { ascending: false }) 

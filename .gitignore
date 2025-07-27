@@ -54,5 +54,6 @@ __pycache__/
 
 
 /backend/storage
-/backend/model
+*.pkl
+*.joblib
 /backend/__pycache__
