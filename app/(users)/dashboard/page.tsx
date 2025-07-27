@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Chart } from "@/app/components/users/chart";
+import { Chart } from "@/app/components/users/Chart";
 import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SiteHeader } from "@/app/components/users/site-header";
+import BottomNav from "@/app/components/users/BottomChatBanner";
+import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
 
 export default function Dashboard() {
     const router = useRouter()
+
+    const[ isChatOpen, setIsChatOpen ] =  useState(false);
 
     useEffect(() => {
         const getUser = async () => {
@@ -25,7 +29,9 @@ export default function Dashboard() {
         getUser()
     }, [])
 
-    
+    const handleClick = () => {
+        setIsChatOpen(!isChatOpen)
+    }
 
     return (
         <div className="flex flex-1 flex-col">
@@ -38,6 +44,10 @@ export default function Dashboard() {
                 
             </div>
         </div>
+        <ChatBotContainer 
+            isChatOpen={isChatOpen} 
+            onChatClick={handleClick}>
+        </ChatBotContainer>
     </div>
     )
 }
