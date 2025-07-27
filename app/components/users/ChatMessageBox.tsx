@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-type Query = {
+type Message = {
     text: string, 
     sender: string
 }
@@ -11,7 +11,7 @@ type ChatBotProps = {
 
 export default function ChatMessageBox(isChatOpen: ChatBotProps){
 
-    const [ query, setQuery ] = useState<Query[]>([]);
+    const [ messages, setMessage ] = useState<Message[]>([]);
     const [ input, setInput ] = useState("")
 
     const handleSend = async () => {
@@ -19,31 +19,31 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
         if (!input.trim()) return;
 
         const userMsg = { sender: 'user', text: input};
-        setQuery(prev => [...prev, userMsg]);
+        setMessage(prev => [...prev, userMsg]);
 
         try {
 
-            const res = await fetch('http://localhost:5000/chat', {
+            const res = await fetch('http://localhost:8000/chat', {
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({message: input}),
+                body: JSON.stringify({query: input, account_id:"acct_1RJ1te2eqcQXQNB8"}),
             });
 
             const data = await res.json();
+            console.log(data)
 
             const botMsg = {sender: 'bot', text: data.response};
-            setQuery(prev => [...prev, botMsg])
+            setMessage(prev => [...prev, botMsg])
 
         } catch (err) {
             console.log(err);
-            setQuery(prev => [...prev, {sender: 'bot', text: 'Error: Could not reach server.'}])
+            setMessage(prev => [...prev, {sender: 'bot', text: 'Error: Could not reach server.'}])
 
         }
 
         setInput('');
     }
 
-    console.log(isChatOpen)
     return (
 
         <div className="fixed bottom-6 right-2 w-md h-1/2 
@@ -56,9 +56,9 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
            {/** Messages Containerd */}
             <div className="chat-box overflow-y-scroll">
             {
-                query.map((q, index) => (
-                    <div key={index} className={q.sender === 'user' ? 'text-right' : 'text-left'}>
-                    <p className="p-2 m-1 rounded-full text-green-700">{q.text}</p>
+                messages.map((msg, index) => (
+                    <div key={index} className={msg.sender === 'user' ? 'text-right' : 'text-left'}>
+                    <p className="p-2 m-1 rounded-full text-green-700">{msg.text}</p>
                   </div>
                 ))
             }
@@ -69,7 +69,7 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
             <div>
                 <input 
                     type="text"
-                    className="w-full border p-2"
+                    className="w-full border p-2 text-green-700"
                     placeholder="Type your message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}    
@@ -77,7 +77,7 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
 
                 <button
                     onClick={handleSend}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-r-md text-sm hover:bg-blue-600">Send
+                    className="bg-blue-500 text-white m-1 px-3 py-1 rounded-md text-sm hover:bg-blue-600">Send
                 </button>
             </div>
         </div> 
