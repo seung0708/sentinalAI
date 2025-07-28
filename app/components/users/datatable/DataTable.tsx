@@ -59,7 +59,6 @@ export function DataTable({data: initialData, }: { data: z.infer<typeof schema>[
     setData(initialData);
   }, [initialData]);
 
-  console.log('DataTable', data)
   const table = useReactTable({
     data,
     columns,

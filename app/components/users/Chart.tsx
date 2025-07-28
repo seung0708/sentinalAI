@@ -26,6 +26,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
+import { time } from "console"
 
 const chartConfig = {
     visitors: {
@@ -41,16 +42,13 @@ const chartConfig = {
     },
   } satisfies ChartConfig
 
-export function Chart() {
-    const isMobile = useIsMobile();
-    const [timeRange, setTimeRange] = useState("30d")
+  interface ChartProps {
+    timeRange: string, 
+    onRangeChange: (range: string) => void,
+    chartData: []
+  }
 
-    useEffect(() => {
-        if(isMobile) {
-            setTimeRange("7d")
-        }
-    }, [isMobile])
-
+export const Chart: React.FC<ChartProps> = ({ timeRange, onRangeChange, chartData}) => {
     return (
         <Card className="@container/cad">
             <CardHeader className="relative">
@@ -58,13 +56,13 @@ export function Chart() {
                     <span className="@[540px]/card:block hidden">
                         Recent High-Risk Transactions
                     </span>
-                    <span className="@[540px]/card:hidden">Last 3 months</span>
+                    
                 </CardDescription>
                 <div className="absolute right-4 top-4">
                     <ToggleGroup
                         type="single"
                         value={timeRange}
-                        onValueChange={setTimeRange}
+                        onValueChange={onRangeChange}
                         variant="outline"
                         className="@[767px]/card:flex hidden"
                     >
@@ -78,10 +76,10 @@ export function Chart() {
                         Last 7 days
                         </ToggleGroupItem>
                     </ToggleGroup>
-                    <Select value={timeRange} onValueChange={setTimeRange}>
+                    <Select value={timeRange} onValueChange={onRangeChange}>
                         <SelectTrigger
-                        className="@[767px]/card:hidden flex w-40"
-                        aria-label="Select a value"
+                            className="@[767px]/card:hidden flex w-40"
+                            aria-label="Select a value"
                         >
                         <SelectValue placeholder="Last 3 months" />
                         </SelectTrigger>
@@ -101,7 +99,7 @@ export function Chart() {
             </CardHeader>
             <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
                 <ChartContainer className="aspect-auto h-[250px] w-full" config={chartConfig}>
-                    <AreaChart>
+                    <AreaChart data={chartData}>
                         <defs>
                             <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                                 <stop
@@ -158,19 +156,19 @@ export function Chart() {
                             }
                             />
                             <Area
-                            dataKey="mobile"
+                            dataKey="count"
                             type="natural"
-                            fill="url(#fillMobile)"
+                            fill="url(#fillDesktop)"
                             stroke="var(--color-mobile)"
                             stackId="a"
                             />
-                            <Area
-                            dataKey="desktop"
+                            {/* <Area
+                            dataKey="count"
                             type="natural"
                             fill="url(#fillDesktop)"
                             stroke="var(--color-desktop)"
                             stackId="a"
-                            />
+                            /> */}
                     </AreaChart>
                 </ChartContainer>
             </CardContent>
