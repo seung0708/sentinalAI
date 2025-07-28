@@ -7,10 +7,23 @@ import { Chart } from "@/app/components/users/Chart";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
+type ChartEntry = {
+  count: number;
+  totalRisk: number;
+};
+
+type GroupedResult = {
+  [key: string]: ChartEntry;
+};
 
 export default function Dashboard() {
-    const [transactions, setTransactions] = useState([])
+    const [summary, setSummary] = useState([])
+    const [chartData, setChartData] = useState<ChartEntry[]>([])
+    const [timeRange, setTimeRange] = useState('30d')
     const router = useRouter()
+
+    console.log(summary)
+    console.log(chartData)
 
     const[ isChatOpen, setIsChatOpen ] =  useState(false);
 
@@ -23,12 +36,39 @@ export default function Dashboard() {
                 router.push('/login');
             }
 
-            const response2 = await fetch('/api/transactions')
-            const result2 = await response2.json()
-            setTransactions(result2.transactions)
+            
         }
         getUser()
     }, [])
+
+    useEffect(() => {
+        const getTransactions = async () => {
+            const response = await fetch(`/api/transactions?page=dashboard&range=${timeRange}`)
+            const result: GroupedResult = await response.json()
+            const chartData = Object.entries(result as GroupedResult).map(([day, { count, totalRisk }]) => ({date: day, count, totalRisk })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+            setChartData(chartData)
+        }
+
+        getTransactions()
+    }, [timeRange])
+
+     useEffect(() => {
+        const getSummary = async () => {
+            const res = await fetch('/api/transactions?summary=true');
+            const result = await res.json();
+            setSummary(result);
+        }
+
+        getSummary()
+    }, [])
+
+    
+
+    const handleRangeChange = (range: string) => {
+        setTimeRange(range)
+        console.log(timeRange)
+    }
 
     const handleClick = () => {
         setIsChatOpen(!isChatOpen)
@@ -38,9 +78,9 @@ export default function Dashboard() {
         <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                <SectionCards transactions={transactions} />
+                <SectionCards summary={summary} />
                 <div className="px-4 lg:px-6">
-                    <Chart />
+                    <Chart timeRange={timeRange} onRangeChange={handleRangeChange} chartData={chartData} />
                 </div>
                 
             </div>
