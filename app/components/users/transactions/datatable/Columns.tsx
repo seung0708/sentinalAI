@@ -1,5 +1,5 @@
 import DragHandle from "./DragHandle"
-import TableCellViewer from "../TableCellView"
+import TableCellViewer from "./TableCellView"
 
 import { ColumnDef } from "@tanstack/react-table"
 import {schema} from './DataTable'

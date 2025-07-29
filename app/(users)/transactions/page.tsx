@@ -1,6 +1,6 @@
 'use client'
 import {useState, useEffect} from 'react'
-import { DataTable } from "@/app/components/users/datatable/DataTable";
+import { DataTable } from "@/app/components/users/transactions/datatable/DataTable";
 
 
 export default function Transactions() {
@@ -16,5 +16,9 @@ export default function Transactions() {
         }
         fetchTransactions()
     },[])
-    return <DataTable data={transactions} />
+    return (
+        <div className='h-full'>
+            <DataTable data={transactions} />
+        </div>
+    )
 }

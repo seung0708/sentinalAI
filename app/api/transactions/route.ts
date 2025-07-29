@@ -5,16 +5,16 @@ import { redirect } from 'next/navigation';
 
 type GroupedData = {
   [key: string]: {
-    count: number;
-    totalRisk: number;
+    low: number;
+    med: number;
+    high: number;
   }
 };
 
-const getStartDateFromRange = (range: string) => {
-    const now = Date.now()
-    
-    return new Date(Number(range.replace('d','')) * 24 * 60 * 60 * 1000)
+type RiskLevel = 'low' | 'medium' | 'high';
 
+const getStartDateFromRange = (range: string) => {    
+    return new Date(Date.now() - Number(range.replace('d','')) * 24 * 60 * 60 * 1000)
 }
 
 export async function GET(request: Request){
@@ -53,16 +53,52 @@ export async function GET(request: Request){
     if (page === 'dashboard') {
         const startDate = getStartDateFromRange(range as string)
         try {
-            const {data, error: fetchTransactionsError} = await supabase.from('transactions').select('timestamp, predicted_risk', {count: 'exact'}).eq('predicted_risk', 'high').eq('account_id', connectedAccount?.account_id).gte('timestamp', startDate.toISOString())
+
+            //Bar chart
+            const {data: timestampRisks, error: fetchRisksError} = await supabase.from('transactions').select('timestamp, predicted_risk', {count: 'exact'}).eq('account_id', connectedAccount?.account_id).gte('timestamp', startDate.toISOString())
             
-            const grouped = data?.reduce((acc: GroupedData, tx) => {
+            const grouped = timestampRisks?.reduce((acc: GroupedData, tx) => {
                 const day = new Date(tx.timestamp).toISOString().slice(0, 10); // 'YYYY-MM-DD'
-                if (!acc[day]) acc[day] = { count: 0, totalRisk: 0 };
-                acc[day].count += 1;
-                acc[day].totalRisk += 1
+                if (!acc[day]) acc[day] = { low:0, med: 0 , high: 0};
+                if (tx.predicted_risk === 'low') acc[day].low += 1;
+                else if (tx.predicted_risk === 'medium') acc[day].med += 1;
+                else if (tx.predicted_risk === 'high') acc[day].high += 1;
                 return acc;
             }, {});
-            return NextResponse.json(grouped)
+
+            //Summary cards
+            const {data: risks, error: fetchTransactionsError} = await supabase.from('transactions').select('predicted_risk').eq('account_id', connectedAccount?.account_id)
+            const total = risks?.length
+            const riskCounts = risks?.reduce((acc: Record<RiskLevel, number>, tx) => {
+                const risk = tx.predicted_risk as RiskLevel;
+                acc[risk] += 1;
+                return acc;
+            }, { low: 0, medium: 0, high: 0 });
+            
+            const summary = {
+                total, 
+                low: riskCounts?.low, 
+                med: riskCounts?.medium, 
+                high: riskCounts?.high
+            }
+
+             if (fetchTransactionsError) {
+                console.error(fechUserError) 
+                return NextResponse.json({error: fetchTransactionsError})
+            }
+
+            //Customer
+            const {data: top5RiskyCustomers, error: topRiskyCustomersError} = await supabase.rpc('get_top_5_risky_customers', {
+                'account_id': connectedAccount?.account_id
+            })
+
+            if (topRiskyCustomersError) {
+                console.error('Error fetching risky customers: ', topRiskyCustomersError)
+            }
+
+           
+        
+            return NextResponse.json({grouped, summary, top5RiskyCustomers})
         } catch (err) {
             console.error(err)
         }
@@ -70,13 +106,8 @@ export async function GET(request: Request){
 
     if (summary === 'true') {
         try {
-            const {data, error: fetchTransactionsError} = await supabase.from('transactions').select('*').eq('account_id', connectedAccount?.account_id)
             
-            if (fetchTransactionsError) {
-                console.error(fechUserError) 
-                return NextResponse.json({error: fetchTransactionsError})
-            }
-            return NextResponse.json(data)
+            return NextResponse.json(summary)
         } catch(error) {
             console.error('Error getting transactions', error)
         }
