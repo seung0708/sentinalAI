@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 import { z } from "zod"
-import { schema } from "./datatable/DataTable"
+import { schema } from "./DataTable"
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -105,7 +105,7 @@ export default function TableCellViewer({ item }: { item: z.infer<typeof schema>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
                   <Label htmlFor="type">Type</Label>
-                  <Select defaultValue={item.type}>
+                  <Select>
                     <SelectTrigger id="type" className="w-full">
                       <SelectValue placeholder="Select a type" />
                     </SelectTrigger>
@@ -146,16 +146,16 @@ export default function TableCellViewer({ item }: { item: z.infer<typeof schema>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
                   <Label htmlFor="target">Target</Label>
-                  <Input id="target" defaultValue={item.target} />
+                  <Input id="target" />
                 </div>
                 <div className="flex flex-col gap-3">
                   <Label htmlFor="limit">Limit</Label>
-                  <Input id="limit" defaultValue={item.limit} />
+                  <Input id="limit" />
                 </div>
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="reviewer">Reviewer</Label>
-                <Select defaultValue={item.reviewer}>
+                <Select >
                   <SelectTrigger id="reviewer" className="w-full">
                     <SelectValue placeholder="Select a reviewer" />
                   </SelectTrigger>

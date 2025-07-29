@@ -9,19 +9,14 @@ import {
     CardTitle,
   } from "@/components/ui/card"
 
-export function SectionCards({summary}: {summary: any}) {
-    const total = summary.length
-    const lowRisk = summary.filter((transaction: any) => transaction.predicted_risk === "low")
-    const highRisk = summary.filter((transaction: any) => transaction.predicted_risk === "high") 
-    const mediumRisk = summary.filter((transaction: any) => transaction.predicted_risk === "medium")
-    
+export function SectionCards({summary}: {summary: any}) {  
     return (
       <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Transactions</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {total}
+              {summary.total}
             </CardTitle>
             <div className="absolute right-4 top-4">
               <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
@@ -43,7 +38,7 @@ export function SectionCards({summary}: {summary: any}) {
           <CardHeader className="relative">
             <CardDescription>Low Risk Transactions</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {lowRisk.length}
+              {summary.low}
             </CardTitle>
             {/* <div className="absolute right-4 top-4">
               <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
@@ -63,7 +58,7 @@ export function SectionCards({summary}: {summary: any}) {
           <CardHeader className="relative">
             <CardDescription>Medium Risk Transactions</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {mediumRisk.length}
+              {summary.med}
             </CardTitle>
             {/* <div className="absolute right-4 top-4">
               <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
@@ -83,7 +78,7 @@ export function SectionCards({summary}: {summary: any}) {
           <CardHeader className="relative">
             <CardDescription>High Risk Transactions</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {highRisk.length}
+              {summary.high}
             </CardTitle>
             {/* <div className="absolute right-4 top-4">
               <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">

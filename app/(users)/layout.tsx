@@ -1,9 +1,34 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-
 import { SiteHeader } from "@/app/components/users/site-header";
+import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
 export default function UserLayout({children}: {children: React.ReactNode}) {
+    const router = useRouter()
+    const[ isChatOpen, setIsChatOpen ] =  useState(false);
+
+    useEffect(() => {
+            const getUser = async () => {
+                const response = await fetch('/api/user')
+                const result = await response.json()
+    
+                if(!result.user) {
+                    router.push('/login');
+                }
+    
+                
+            }
+            getUser()
+        }, [])
+
+    const handleClick = () => {
+        setIsChatOpen(!isChatOpen)
+    }
+
     return (
         <div className="relative flex min-h-screen">
             <SidebarProvider>
@@ -13,6 +38,10 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
                     {children}
                 </div>
             </SidebarProvider>
+            <ChatBotContainer 
+                isChatOpen={isChatOpen} 
+                onChatClick={handleClick}>
+            </ChatBotContainer>
         </div>
     )
 }
