@@ -549,4 +549,319 @@ export const testData = [
     payment_method: { type: 'card', token: 'tok_discover' },
     created_at: '2025-07-15T11:04:00Z',
   },
+  // NORMAL CUSTOMER: Michael Chen - Large legitimate purchases
+{
+  amount: 150000, // $1,500 - high but normal for business
+  currency: 'usd',
+  billing_details: {
+    name: 'Michael Chen',
+    email: 'michael.chen@acme-corp.com',
+    phone: '+1-555-7777',
+    address: {
+      line1: '850 Market Street',
+      city: 'San Francisco',
+      state: 'CA',
+      postal_code: '94102',
+      country: 'US',
+    }
+  },
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T10:00:00Z',
+},
+{
+  amount: 180000, // $1,800
+  // ... same details as above
+  created_at: '2025-07-25T16:00:00Z',
+},
+
+// FRAUD PATTERN: Sarah Miller - Address hopping
+{
+  amount: 4500,
+  currency: 'usd',
+  billing_details: {
+    name: 'Sarah Miller',
+    email: 'sarah.miller@gmail.com',
+    phone: '+1-555-8888',
+    address: {
+      line1: '123 First St',
+      city: 'Miami',
+      state: 'FL',
+      postal_code: '33101',
+      country: 'US',
+    }
+  },
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T12:00:00Z',
+},
+{
+  amount: 4800,
+  // ... same details but different address
+  address: {
+    line1: '456 Second St',
+    city: 'Orlando',
+    state: 'FL',
+    postal_code: '32801',
+  },
+  created_at: '2025-07-25T12:30:00Z',
+},
+{
+  amount: 5200,
+  // ... different address again
+  address: {
+    line1: '789 Third St',
+    city: 'Tampa',
+    state: 'FL',
+    postal_code: '33601',
+  },
+  created_at: '2025-07-25T13:00:00Z',
+},
+
+// FRAUD PATTERN: Alex Johnson - Rapid small transactions
+{
+  amount: 1000, // $10
+  currency: 'usd',
+  billing_details: {
+    name: 'Alex Johnson',
+    email: 'alex.j@example.com',
+    phone: '+1-555-9999',
+    address: {
+      line1: '742 Pine St',
+      city: 'Portland',
+      state: 'OR',
+      postal_code: '97201',
+      country: 'US',
+    }
+  },
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T14:00:00Z',
+},
+// Add 5 more transactions with 2-minute intervals
+// ... same details but timestamps: 14:02, 14:04, 14:06, 14:08, 14:10
+
+// NORMAL CUSTOMER: Lisa Wong - Regular shopping pattern
+{
+  amount: 3500,
+  currency: 'usd',
+  billing_details: {
+    name: 'Lisa Wong',
+    email: 'lisa.wong@example.com',
+    phone: '+1-555-5555',
+    address: {
+      line1: '222 Market St',
+      city: 'Chicago',
+      state: 'IL',
+      postal_code: '60601',
+      country: 'US',
+    }
+  },
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T09:00:00Z',
+},
+// Add 2 more normal transactions spaced 4 hours apart
+// ... same details but timestamps: 13:00, 17:00
+
+// FRAUD PATTERN: Anonymous User - Fake details
+{
+  amount: 7500,
+  currency: 'usd',
+  billing_details: {
+    name: 'John Smith',
+    email: 'user123@tempmail.com',
+    phone: '+1-000-0000',
+    address: {
+      line1: '999 Unknown St',
+      city: 'Springfield',
+      state: 'ZZ', // Invalid state
+      postal_code: '00000',
+      country: 'US',
+    }
+  },
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T15:00:00Z',
+},
+{
+    amount: 1875,
+    currency: 'usd',
+    billing_details: {
+      name: 'Noah Delgado',
+      email: 'noah.d@example.com',
+      phone: '+1-555-8823',
+      address: {
+        line1: '741 Willow Way',
+        city: 'Phoenix',
+        state: 'AZ',
+        postal_code: '85001',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 14210,
+    currency: 'usd',
+    billing_details: {
+      name: 'Isabella Martinez',
+      email: 'isabella.martinez@safeemail.com',
+      phone: '+1-555-6261',
+      address: {
+        line1: '3033 Coral Ridge',
+        city: 'San Diego',
+        state: 'CA',
+        postal_code: '92101',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  },
+  {
+    amount: 21000,
+    currency: 'usd',
+    billing_details: {
+      name: 'Liam O’Connor',
+      email: 'liam.oconnor@inboxmail.com',
+      phone: '+1-555-4622',
+      address: {
+        line1: '910 Oakridge Blvd',
+        city: 'Boston',
+        state: 'MA',
+        postal_code: '02108',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+  },
+  {
+    amount: 7250,
+    currency: 'usd',
+    billing_details: {
+      name: 'Grace Holloway',
+      email: 'grace.holloway@protonmail.com',
+      phone: '+1-555-8890',
+      address: {
+        line1: '1312 Linden Avenue',
+        city: 'Chicago',
+        state: 'IL',
+        postal_code: '60601',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+  },
+  {
+    amount: 2499,
+    currency: 'usd',
+    billing_details: {
+      name: 'Owen Simmons',
+      email: 'owen.simms@fastmail.com',
+      phone: '+1-555-9902',
+      address: {
+        line1: '77 Briar Patch Road',
+        city: 'Nashville',
+        state: 'TN',
+        postal_code: '37201',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 19849,
+    currency: 'usd',
+    billing_details: {
+      name: 'Avery Chen',
+      email: 'avery.chen@inboxmail.com',
+      phone: '+1-555-3347',
+      address: {
+        line1: '884 Jasmine Street',
+        city: 'Portland',
+        state: 'OR',
+        postal_code: '97201',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  },
+  {
+    amount: 1500,
+    currency: 'usd',
+    billing_details: {
+      name: 'Brayden Scott',
+      email: 'bray.scott1994@mailbox.org',
+      phone: '+1-555-4773',
+      address: {
+        line1: '221 Pine Hollow Rd',
+        city: 'Denver',
+        state: 'CO',
+        postal_code: '80201',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+  },
+  {
+    amount: 6599,
+    currency: 'usd',
+    billing_details: {
+      name: 'Natalie Greer',
+      email: 'n.greer87@examplemail.com',
+      phone: '+1-555-7712',
+      address: {
+        line1: '403 Redwood Terrace',
+        city: 'Charlotte',
+        state: 'NC',
+        postal_code: '28202',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+  },
+  {
+    amount: 12230,
+    currency: 'usd',
+    billing_details: {
+      name: 'Jalen Brooks',
+      email: 'jalen.brooks@safeinbox.com',
+      phone: '+1-555-6230',
+      address: {
+        line1: '1190 Rolling Oaks Dr',
+        city: 'Atlanta',
+        state: 'GA',
+        postal_code: '30301',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 8900,
+    currency: 'usd',
+    billing_details: {
+      name: 'Tessa Morgan',
+      email: 'tessa.morgan@emailbox.org',
+      phone: '+1-555-8445',
+      address: {
+        line1: '682 Prairie Avenue',
+        city: 'Minneapolis',
+        state: 'MN',
+        postal_code: '55401',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  }
 ];
