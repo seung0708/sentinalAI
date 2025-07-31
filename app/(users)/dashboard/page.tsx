@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Chart } from "@/app/components/users/Chart";
-import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
-import { AppSidebar } from "@/app/components/users/Sidebar";
-import { SiteHeader } from "@/app/components/users/site-header";
-import BottomNav from "@/app/components/users/BottomChatBanner";
 import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 
 

@@ -19,7 +19,9 @@ export async function POST(req: NextRequest){
         switch(event.type){
             // when event is payment_intent.succeded
             case 'payment_intent.succeeded':
-                const paymentIntent = event.data.object as Stripe.PaymentIntent
+                const paymentIntent = event.data.object as Stripe.PaymentIntent & {
+                    charges: Stripe.ApiList<Stripe.Charge>;
+                };
                 const {id, amount, created, customer, charges, status, payment_method_types} = paymentIntent
 
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest){
                     return NextResponse.json({message: 'Duplicate transaction', status: 200})
                 }
 
-                const chargesForPI = charges.data.filter(charge => charge.payment_intent == id)
+                const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
 
                const { error: transactionError } = await supabase
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest){
                     return NextResponse.json({error: 'Error retrieving transactions from database', status: 500})
                 }
                 
-                const data = await fetch('http://localhost:5000/predict-fraud', {
+                const data = await fetch('http://localhost:8000/predict-fraud', {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json',    
@@ -96,7 +98,7 @@ export async function POST(req: NextRequest){
 
 
 
-                const indexTransaction = await fetch('http://localhost:5000/index-transaction', {
+                const indexTransaction = await fetch('http://localhost:8000/index-transaction', {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json'

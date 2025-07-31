@@ -2,40 +2,30 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
+import Stripe from "stripe";
 
-interface TestDataItem {
-    amount: number, 
-    currency: string, 
-    billing_details: {
-        address: {
-            city: string, 
-            line1: string, 
-            postal_code: string, 
-            state: string
-        },
-        email: string,
-        name: string,
-        phone: string
-    }, 
-    status: string, 
-    payment_method: {
-        type: string, 
-        token: string
-    }
-}
+type PaymentIntentWithCharges = Stripe.PaymentIntent & {
+    charges: Stripe.ApiList<Stripe.Charge>;
+  };
+  
 
 export const createPaymentIntent = async (accountId: string) => {
     const supabase = await createClient()
-    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tessa Morgan')
-    const {amount, currency, billing_details, payment_method} = transactions[0]
+    const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tyler Fox')
+    const {amount, currency, billing_details, payment_method} = transactions[1]
     let customer
     try{
+
         const customersList = await stripe.customers.list({
             stripeAccount: accountId
         })
-
-        const testTransactionCustomer = customersList.data.filter(customer => customer.name == billing_details?.name)
-
+        
+        const testTransactionCustomer = customersList.data.filter(customer => 
+            customer.name == billing_details?.name &&
+            customer.email == billing_details?.email &&
+            customer.phone == billing_details?.phone
+        )
+        console.log(testTransactionCustomer)
         if (!testTransactionCustomer[0]?.id) {
             const createCustomer = await stripe.customers.create({
                 name: billing_details?.name,
@@ -45,8 +35,16 @@ export const createPaymentIntent = async (accountId: string) => {
             }, {
                 stripeAccount: accountId
             })
-
-            customer = createCustomer
+        
+            // Add a small delay to allow propagation
+            await new Promise(resolve => setTimeout(resolve, 1000))
+        
+            // Verify customer was created
+            const verifyCustomer = await stripe.customers.retrieve(createCustomer.id, {
+                stripeAccount: accountId
+            })
+            
+            customer = verifyCustomer
         } else {
             customer = testTransactionCustomer[0]
         }
@@ -74,21 +72,26 @@ export const createPaymentIntent = async (accountId: string) => {
             }
         )
 
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency,
-            automatic_payment_methods: {
+        const paymentIntent = await stripe.paymentIntents.create(
+            {
+              amount,
+              currency: currency as string,
+              automatic_payment_methods: {
                 enabled: true,
-                allow_redirects: 'never'
+                allow_redirects: 'never',
+              },
+              payment_method: paymentMethod.id,
+              customer: customer.id,
+              confirm: true,
+              expand: ['charges', 'customer'],
             },
-            payment_method: paymentMethod.id,
-            customer: customer.id,
-            confirm: true,
-            expand: ['charges', 'customer']
-        },{
-            stripeAccount: accountId
-        })
-        return paymentIntent
+            {
+              stripeAccount: accountId,
+            }
+          );
+          
+          
+          return paymentIntent;
 
         
     } catch (error){

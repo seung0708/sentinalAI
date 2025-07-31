@@ -174,10 +174,10 @@ export const testData = [
     currency: 'usd',
     billing_details: {
       name: 'Tyler Fox',
-      email: 'fox123@maildrop.cc',
-      phone: '+1-555-9999',
+      email: 'fox_ty@maildrop.cc',
+      phone: '+1-555-9090',
       address: {
-        line1: '432 Random St',
+        line1: '432 El Paso St',
         city: 'Dallas',
         state: 'TX',
         postal_code: '75201',
@@ -191,11 +191,11 @@ export const testData = [
     amount: 9200,
     currency: 'usd',
     billing_details: {
-      name: 'Ty Fox',
+      name: 'Tyler Fox',
       email: 'fox_ty@maildrop.cc',
       phone: '+1-555-9090',
       address: {
-        line1: '22 Hack Dr',
+        line1: '22 Alameda Dr',
         city: 'Austin',
         state: 'TX',
         postal_code: '73301',
@@ -551,7 +551,7 @@ export const testData = [
   },
   // NORMAL CUSTOMER: Michael Chen - Large legitimate purchases
 {
-  amount: 150000, // $1,500 - high but normal for business
+  amount: 15000, // $1,500 - high but normal for business
   currency: 'usd',
   billing_details: {
     name: 'Michael Chen',
@@ -596,20 +596,27 @@ export const testData = [
   created_at: '2025-07-25T12:00:00Z',
 },
 {
-  amount: 4800,
-  // ... same details but different address
-  address: {
-    line1: '456 Second St',
-    city: 'Orlando',
-    state: 'FL',
-    postal_code: '32801',
+  amount: 4000,
+  currency: 'usd',
+  billing_details: {
+    name: 'Sarah Miller',
+    email: 'sarah.miller@gmail.com',
+    phone: '+1-555-8888',
+    address: {
+      line1: '456 Second St',
+      city: 'Orlando',
+      state: 'FL',
+      postal_code: '32801',
+    }
   },
-  created_at: '2025-07-25T12:30:00Z',
+  status: 'succeeded',
+  payment_method: { type: 'card', token: 'tok_visa' },
+  created_at: '2025-07-25T12:02:00Z',
 },
 {
   amount: 5200,
-  // ... different address again
-  address: {
+  currency: 'usd',
+  billing_details: {
     line1: '789 Third St',
     city: 'Tampa',
     state: 'FL',
@@ -858,6 +865,186 @@ export const testData = [
         city: 'Minneapolis',
         state: 'MN',
         postal_code: '55401',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  }, 
+  {
+    amount: 11250,
+    currency: 'usd',
+    billing_details: {
+      name: 'Maya Reynolds',
+      email: 'maya.reynolds@mailservice.com',
+      phone: '+1-555-2222',
+      address: {
+        line1: '502 Clover Hill Lane',
+        city: 'Cincinnati',
+        state: 'OH',
+        postal_code: '45201',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  },
+  {
+    amount: 2695,
+    currency: 'usd',
+    billing_details: {
+      name: 'Declan Whitaker',
+      email: 'declan.whitaker@safeemail.net',
+      phone: '+1-555-3981',
+      address: {
+        line1: '39 Elm Grove',  
+        city: 'Indianapolis',
+        state: 'IN',
+        postal_code: '46201',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 19200,
+    currency: 'usd',
+    billing_details: {
+      name: 'Sophia Caldwell',
+      email: 'sophia.caldwell@inboxzone.org',
+      phone: '+1-555-1270',
+      address: {
+        line1: '1970 Oak Forest Dr',
+        city: 'Raleigh',
+        state: 'NC',
+        postal_code: '27601',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+  },
+  {
+    amount: 899,
+    currency: 'usd',
+    billing_details: {
+      name: 'Caleb Foster',
+      email: 'caleb.foster@emailhost.com',
+      phone: '+1-555-7345',
+      address: {
+        line1: '109 Riverbend Parkway',
+        city: 'Tampa',
+        state: 'FL',
+        postal_code: '33601',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+  },
+  {
+    amount: 8425,
+    currency: 'usd',
+    billing_details: {
+      name: 'Layla Vaughn',
+      email: 'layla.vaughn@protonmail.com',
+      phone: '+1-555-4203',
+      address: {
+        line1: '660 Prairie Trail',
+        city: 'Boise',
+        state: 'ID',
+        postal_code: '83701',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 13480,
+    currency: 'usd',
+    billing_details: {
+      name: 'Ethan Becker',
+      email: 'ethan.b@examplemail.com',
+      phone: '+1-555-2356',
+      address: {
+        line1: '3008 Whispering Pines Dr',
+        city: 'Madison',
+        state: 'WI',
+        postal_code: '53701',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_mastercard' },
+  },
+  {
+    amount: 2999,
+    currency: 'usd',
+    billing_details: {
+      name: 'Naomi Schwartz',
+      email: 'naomi.schwartz@securemail.com',
+      phone: '+1-555-5820',
+      address: {
+        line1: '482 Kings Ridge Drive',
+        city: 'Salt Lake City',
+        state: 'UT',
+        postal_code: '84101',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_amex' },
+  },
+  {
+    amount: 1749,
+    currency: 'usd',
+    billing_details: {
+      name: 'Julian Fox',
+      email: 'julian.fox@maildrop.net',
+      phone: '+1-555-9432',
+      address: {
+        line1: '77 Meadow View Rd',
+        city: 'Fresno',
+        state: 'CA',
+        postal_code: '93701',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_discover' },
+  },
+  {
+    amount: 16595,
+    currency: 'usd',
+    billing_details: {
+      name: 'Zoe McAllister',
+      email: 'zoe.mc@webmailhub.com',
+      phone: '+1-555-7641',
+      address: {
+        line1: '1000 Sunset Ridge Dr',
+        city: 'Omaha',
+        state: 'NE',
+        postal_code: '68101',
+        country: 'US',
+      },
+    },
+    status: 'succeeded',
+    payment_method: { type: 'card', token: 'tok_visa' },
+  },
+  {
+    amount: 5300,
+    currency: 'usd',
+    billing_details: {
+      name: 'Elijah Monroe',
+      email: 'elijah.monroe@hostmail.org',
+      phone: '+1-555-1149',
+      address: {
+        line1: '2255 Woodland Park Rd',
+        city: 'Columbus',
+        state: 'OH',
+        postal_code: '43085',
         country: 'US',
       },
     },

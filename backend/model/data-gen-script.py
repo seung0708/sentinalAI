@@ -16,7 +16,7 @@ PAYMENT_METHODS = ['card', 'google_pay', 'apple_pay', 'stripe']
 
 faker = Faker()
 fraud_phones_pool = [faker.phone_number() for _ in range(10)]
-fraud_street = ['123 Fake Street, Faketown', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
+fraud_street = ['123 Fake Street', 'PO Box 4567', '0 Null Avenue', '999 Unknown Blvd', '321 Imaginary Rd']
 fraud_city = ['Faketown', 'Anytown', 'Nowhere', 'Mystery', 'Fakesville']
 fraud_zip = ['99999', '12345','00000' ] 
 

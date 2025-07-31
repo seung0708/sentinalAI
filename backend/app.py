@@ -4,20 +4,14 @@ from pathlib import Path
 from supabase import create_client
 from flask_cors import CORS 
 import joblib
-import pandas as pd
-from supabase import create_client
-import joblib
-import pandas as pd
-from supabase import create_client
-from dotenv import load_dotenv
 import os
-
+import stripe
 from transaction_processing import process_transaction, format_risk_assessment
 from langchain_llama.llama_indexing import TransactionProcessor
 from langchain_llama.lang_chain import TransactionChatBot
 from inference.predict import predict_risk
 
-load_dotenv(dotenv_path="../.env.local")
+load_dotenv()
 
 url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
@@ -26,30 +20,27 @@ openai_api_key= os.getenv('OPENAI_API_KEY')
 
 supabase = create_client(url, key)
 
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
 app = Flask(__name__)
 CORS(app)
 
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
 
-# response = supabase.table('transactions').select('*').execute()
-# data=response.data
-# print(data)
-
 model = joblib.load('model/fraud_models.joblib')
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
 def predict_fraud():
-    # Process transaction and get features
-    X, latest_tx = process_transaction(request.json)  # Unpack both return values
+    # process transaction and get features
+    X, latest_tx = process_transaction(request.json) 
     
-    # Get prediction
+    # get prediction
     prediction = predict_risk(X, model)
     
     pred_class_index = prediction.argmax()
     response_data = format_risk_assessment(X, latest_tx, model['final'], pred_class_index, prediction)
-    print(response_data)
     return jsonify(response_data)
 
 @app.route('/index-transaction', methods=['POST'])
@@ -76,6 +67,8 @@ def chat():
         return jsonify({"error": "Query missing"}), 400
     if not account_id:
         return jsonify({"error": "Account ID missing"}), 400
+
+    
         
     return chatbot.chat(query, account_id)
 
