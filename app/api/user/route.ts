@@ -6,24 +6,19 @@ import { redirect } from 'next/navigation';
 export async function GET(request: Request){
     const supabase = await createClient();
     const { data: {user}} = await supabase.auth.getUser();
-    let response;
-
-    if (user) {
-        response = NextResponse.json({
-            user,
-            status: 200
-        });
-    } else {
-        redirect('/')
-    }
-    
     if(!user) {
-        response = NextResponse.json({
+        return NextResponse.json({
             status: 400, 
             error: 'No user found'
         })
     }
 
-    return response; 
+    const {data: connectedAccount, error: fetchConnectAccError} = await supabase.from('connected_accounts').select('account_id').eq('user_id', user?.id).single()
+    
+    return NextResponse.json({
+        user,
+        connectedAccount,
+        status: 200
+    }); 
    
 }

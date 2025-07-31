@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`mx-8 md:mx-20 bg-linear-t from-[2E4430] to-[2E4430] ${montserrat.className} antialiased`}
+        className={`mx-4 md:mx-12 lg:mx-20 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-[#163936] to-[#296639] min-h-screen ${montserrat.className} antialiased`}
       >
         <AuthProvider>
           {children}
