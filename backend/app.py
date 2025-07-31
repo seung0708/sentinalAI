@@ -11,7 +11,7 @@ from langchain_llama.llama_indexing import TransactionProcessor
 from langchain_llama.lang_chain import TransactionChatBot
 from inference.predict import predict_risk
 
-load_dotenv()
+load_dotenv(dotenv_path="../.env.local")
 
 url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
@@ -28,7 +28,7 @@ CORS(app)
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
 
-model = joblib.load('model/fraud_models.joblib')
+model = joblib.load('/Users/magsz/Documents/VS Code/Projects/sentinalAI/backend/fraud_models.joblib')
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])

@@ -31,6 +31,8 @@ export default function SignUpForm() {
 
     async function onSubmit(data: FormData) {
         try {
+
+            
             const response = await fetch('/api/auth/signUp', {
                 method: 'POST', 
                 headers: {
@@ -40,7 +42,7 @@ export default function SignUpForm() {
             });
 
             if(!response.ok) {
-                throw new Error ('Failed to Sign in')
+                throw new Error ('Failed to Sign Up')
             }
         
 

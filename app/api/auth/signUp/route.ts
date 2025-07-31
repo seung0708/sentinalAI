@@ -3,16 +3,27 @@ import {Database} from '@/app/api/types/supabase'
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest){
-    const supabase = await createClient();
+
     try{
+        const supabase = await createClient();
+
         const body = await req.json();
     
         const {company, email, password} = body;
+
+        console.log(company, email, password);
     
         const {data: authData, error: dbError} = await supabase.auth.signUp({
             email: email,
             password: password
         });
+
+        if (dbError){
+            return NextResponse.json(
+                {error: "Auth sign up failed", details: dbError.message},
+                {status: 400}
+            )
+        }
     
         type Newuser = Database['public']['Tables']['users']["Insert"] & {auth_id: string}
     
@@ -25,16 +36,18 @@ export async function POST(req: NextRequest){
         const {data, error } = await supabase.from('users').insert(newUser);
     
         if(error){
+            // console.log(error)
             return NextResponse.json({error: "Could not sign up user"}, {
                 status:500,
                 headers: {'Content-Type': 'application/json'}
             });
         }
         
-        return NextResponse.json({message: "Sing Up Succesful"})
+        return NextResponse.json({message: "Sign Up Succesful"})
 
     } catch(error){
-        return NextResponse.json({error: "Server error"}, {
+        // console.log(error)
+        return NextResponse.json({error: "Server error", message:"Failed to reach server"}, {
             status: 500,
             headers: {'Content-Type': 'application/json'}
         })

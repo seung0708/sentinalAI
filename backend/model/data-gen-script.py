@@ -187,7 +187,7 @@ def generate_transactions(business_size='small', fraud_customer_rate=0.1, days=3
 #     fraud_reason = random.choice(FRAUD_REASONS) if fraud else None 
 
 #     return { 
-#          "stripe_id": txn_id,
+#         "stripe_id": txn_id,
 #         "amount": amount,
 #         "currency": currency,
 #         "created": created.isoformat(),

@@ -15,3 +15,17 @@ Content-Type: application/json
       "query":"What are my last 5 transactions?",
     "account_id":"acct_1RJ1te2eqcQXQNB8"    
 }
+
+###
+GET http://localhost:3000/api/analytics
+
+###
+POST http://localhost:3000/api/auth/signUp 
+Content-Type: "application/json"
+
+{
+    "company": "MG LLC",
+    "email": "gomez.mario171@gmail.com",
+    "password": "Technonova1995!"
+}
+

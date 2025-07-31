@@ -2,7 +2,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function TimeRangeSelector({timeRange, setTimeRange,}: {timeRange: string; setTimeRange: (value: string) => void;}) {
     return (
-        <div className="my-4 flex items-center justify-between border border-muted rounded-md p-1 inline-flex">
+        <div className="my-4 flex items-center justify-between border border-muted rounded-md p-1">
             <ToggleGroup
                 type="single"
                 value={timeRange}
