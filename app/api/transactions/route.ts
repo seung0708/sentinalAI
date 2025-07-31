@@ -89,7 +89,7 @@ export async function GET(request: Request){
 
             //Customer
             const {data: top5RiskyCustomers, error: topRiskyCustomersError} = await supabase.rpc('get_top_5_risky_customers', {
-                'account_id': connectedAccount?.account_id
+                'p_account_id': connectedAccount?.account_id
             })
 
             if (topRiskyCustomersError) {
