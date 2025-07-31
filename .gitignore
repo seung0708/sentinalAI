@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#venv
+venv 
+
+#csv files
+*.csv
+
+#pkl
+*.pkl
+
+
+/backend/storage
+/backend/model

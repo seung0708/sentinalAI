@@ -1,0 +1,87 @@
+import pandas as pd
+
+import shap
+
+from feature_engineering import add_combined_frequency_risk, add_address_risk, add_amount_risk
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+feature_columns = ['tx_count_last_5min', 'avg_tx_last_5min', 'risk_fixed_5min', 'risk_combined_5min', 'tx_count_last_10min', 'avg_tx_last_10min', 'risk_fixed_10min', 'risk_combined_10min', 'tx_count_last_30min', 'avg_tx_last_30min', 'risk_fixed_30min', 'risk_combined_30min', 'tx_count_last_1h', 'avg_tx_last_1h', 'risk_fixed_1h', 'risk_combined_1h', 'combined_frequency_risk', 'is_fake_street', 'is_fake_city', 'fake_address_score', 'addr_change_score', 'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk']
+intervals = ['5min', '10min', '30min', '1h']
+fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
+
+
+def process_stripe_transaction(request_data):
+    transactions = pd.DataFrame(request_data)
+    transactions['timestamp'] = pd.to_datetime(transactions['timestamp'])
+    transactions['amount'] = transactions['amount'].astype(float)
+    transactions = add_combined_frequency_risk(transactions, intervals, fixed_thresholds)
+    transactions = add_address_risk(transactions)
+    transactions = add_amount_risk(transactions)
+    transactions['overall_risk'] = (
+        0.5 * transactions['combined_frequency_risk'] +
+        0.3 * transactions['combined_address_risk'] +
+        0.2 * transactions['amount_risk_score']
+    )
+    #print(transactions)
+    transactions = transactions.sort_values('timestamp', ascending=False).reset_index(drop=True)
+    latest_tx = transactions.iloc[0]  # newest transaction
+
+    int_features = [
+    'tx_count_last_5min', 'risk_fixed_5min', 'risk_combined_5min',
+    'tx_count_last_10min', 'risk_fixed_10min', 'risk_combined_10min',
+    'tx_count_last_30min', 'risk_fixed_30min', 'risk_combined_30min',
+    'tx_count_last_1h', 'risk_fixed_1h', 'risk_combined_1h',
+    'is_fake_street', 'is_fake_city'
+    ]
+
+    float_features = [
+        'avg_tx_last_5min', 'avg_tx_last_10min', 'avg_tx_last_30min', 'avg_tx_last_1h',
+        'combined_frequency_risk', 'fake_address_score', 'addr_change_score',
+        'combined_address_risk', 'avg_amount', 'amount_risk_score', 'overall_risk'
+    ]
+
+    for col in int_features:
+        val = pd.to_numeric(latest_tx[col], errors='coerce')
+        latest_tx[col] = int(0 if pd.isna(val) else val)
+
+    for col in float_features:
+        val = pd.to_numeric(latest_tx[col], errors='coerce')
+        latest_tx[col] = float(0.0 if pd.isna(val) else val)
+
+    X = pd.DataFrame([latest_tx[feature_columns]])
+
+    return X, latest_tx
+
+
+def generate_explanation(X, latest_tx, model, pred_class_index, prediction):
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X)
+    #print(shap_values)
+    row_values = shap_values[0, :, pred_class_index]
+    base_value = explainer.expected_value[pred_class_index]
+
+    explanation_parts = []
+    for feature, shap_val in sorted(zip(X.columns, row_values), key=lambda x: abs(x[1]), reverse=True)[:3]:
+        sign = "+" if shap_val >= 0 else "-"
+        explanation_parts.append(f"{feature} contributed {sign}{abs(shap_val):.3f}")
+
+    explanation_text = (
+        f"Model prediction (probabilities): {prediction.tolist()}\n"
+        f"Base value: {base_value:.4f}\n"
+        f"Top contributing features:\n- " + "\n- ".join(explanation_parts)
+    )
+
+    return {
+        "predicted_risk": max(
+            zip(["low", "medium", "high"], prediction[0]), key=lambda x: x[1]
+        )[0],
+        "probabilities": {
+            "low": round(float(prediction[0][0]), 2),
+            "medium": round(float(prediction[0][1]), 2),
+            "high": round(float(prediction[0][2]), 2),
+        },
+        "explanation": explanation_text,
+        "derived_features": {col: latest_tx[col] for col in feature_columns}
+    }
