@@ -1,5 +1,14 @@
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt 
+from sklearn.metrics import (
+    confusion_matrix,
+    ConfusionMatrixDisplay, 
+    roc_curve,
+    roc_auc_score,
+    precision_recall_curve,
+    average_precision_score
+)
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split,RandomizedSearchCV 
 from sklearn.ensemble import RandomForestClassifier
@@ -7,12 +16,29 @@ from sklearn.metrics import accuracy_score, classification_report
 from imblearn.over_sampling import SMOTE
 from xgboost import XGBClassifier
 
+'''
+    Supervised Learning 
+        Classification problem
+'''
 
-#load dataset from file
-df = pd.read_csv("creditcard.csv")
 
-scaler = StandardScaler()
-df_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+#create DataFrame from csv
+df = pd.read_csv("C:/Users/SeungHyun/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions.csv")
+
+#previews the first n rows of df, default rows is 5
+print(df.head())
+#getting the count of all transactions that are fraud
+print(df['is_fraud'].value_counts())
+
+# encode categorical columns - 
+# converting columns that contain strings into numeerical inputs for the model to read
+df = pd.get_dummies(df, columns=['payment_method', 'currency', 'fraud_reason'], drop_first=True)
+
+
+# drop non-numeric and irrelevant columns
+columns_to_drop = ['stripe_id', 'user_id', 'created', 'is_fraud']
+features_to_scale = df.drop(columns=columns_to_drop)
+
 
 #splitting data
 X = df.drop('Class', axis=1) # all columns except Class which contains fraud values
