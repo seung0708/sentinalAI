@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Router } from "express"
 
 const accountFormSchema = z.object({
   email: z
@@ -46,7 +47,31 @@ export function AccountForm() {
     defaultValues,
   })
 
-  function onSubmit(data: AccountFormValues) {
+  async function onSubmit(data: AccountFormValues) {
+
+    try {
+      const response = await fetch('api/auth/updateUser', {
+        method:"POST",
+        headers: {
+          'Content-Type':'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if(!response.ok){
+        throw new Error ('Failed to login')
+      }
+
+      const result = await response.json();
+
+      if(result.status === 200){
+        console.log('Account is updated')
+      } else if ( result.status ===400 ) {
+        console.log(result.error)
+      }
+    } catch(error){
+      console.log(error);
+    }
 
   }
 
@@ -60,7 +85,7 @@ export function AccountForm() {
             <FormItem>
               <FormLabel>Change Email</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Your Email" {...field} />
+                <Input placeholder="Your Email" {...field} />
               </FormControl>
               <FormDescription>
 
@@ -76,7 +101,7 @@ export function AccountForm() {
             <FormItem className="flex flex-col">
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="Your Password" {...field} />
+                <Input type="password" placeholder="Your Password" {...field} />
               </FormControl>
               <FormDescription>
               </FormDescription>
@@ -91,7 +116,7 @@ export function AccountForm() {
             <FormItem className="flex flex-col">
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input placeholder="Your Password" {...field} />
+                <Input type="password" placeholder="Your Password" {...field} />
               </FormControl>
               <FormDescription>
                 

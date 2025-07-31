@@ -24,7 +24,7 @@ dtype_map = {
 
 # Read and preprocess data
 transactions = pd.read_csv(
-    "D:\\programming\\projects\\sentinel-ai\\backend\\sample_transactions_small.csv",
+    "/Users/magsz/Documents/VS Code/Projects/sentinalAI/backend/sample_transactions_small.csv",
     dtype=dtype_map
 )
 # convert timestamp to datetime
@@ -33,6 +33,9 @@ transactions['timestamp'] = pd.to_datetime(transactions['timestamp'], format='IS
 # calculate all risk features
 intervals = ['5min', '10min', '30min', '1h']
 fixed_thresholds = {'5min': 3, '10min': 5, '30min': 8, '1h': 15}
+
+print("Columns in DataFrame:", transactions.columns.tolist())
+
 transactions = add_combined_frequency_risk(transactions, intervals, fixed_thresholds)
 transactions = add_address_risk(transactions)
 transactions = add_amount_risk(transactions)
