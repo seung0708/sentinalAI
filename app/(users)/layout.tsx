@@ -10,20 +10,19 @@ import ChatBotContainer from "@/app/components/users/ChatBotContainer";
 export default function UserLayout({children}: {children: React.ReactNode}) {
     const router = useRouter()
     const[ isChatOpen, setIsChatOpen ] =  useState(false);
+    const [connectedAccount, setConnectedAccount] = useState('');
 
     useEffect(() => {
-            const getUser = async () => {
-                const response = await fetch('/api/user')
-                const result = await response.json()
-    
-                if(!result.user) {
-                    router.push('/login');
-                }
-    
-                
-            }
-            getUser()
-        }, [])
+        const getUser = async () => {
+            const response = await fetch('/api/user')
+            const result = await response.json()
+            if(!result.user) {
+                router.push('/login');
+            }               
+            setConnectedAccount(result.connectedAccount.account_id)
+        }
+        getUser()
+    }, [])
 
     const handleClick = () => {
         setIsChatOpen(!isChatOpen)
@@ -39,7 +38,8 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
                 </div>
             </SidebarProvider>
             <ChatBotContainer 
-                isChatOpen={isChatOpen} 
+                isChatOpen={isChatOpen}
+                connectedAccount={connectedAccount}
                 onChatClick={handleClick}>
             </ChatBotContainer>
         </div>

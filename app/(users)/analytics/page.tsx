@@ -85,12 +85,12 @@ export default function Analytics() {
   return (
     <div className="w-full">
      
-      <div className="my-4 grid lg:grid-cols-3 gap-4">
-        <div className="col-span-1">
+      <div className="my-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-1 lg:col-span-1 w-full h-full">
           <ChartPie riskTotals={riskTotals} />
           
         </div>
-        <div className="col-span-2">
+        <div className="col-span-2 lg:col-span-2 w-full h-full">
           <ChartBarHorizontal past6months={past6months}  />
         </div>
       </div>

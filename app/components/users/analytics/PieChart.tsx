@@ -49,15 +49,15 @@ export function ChartPie({riskTotals}: {riskTotals: RiskTotals}) {
     ];
     
     return (
-        <Card className="flex flex-col h-full">
-        <CardHeader className="items-center pb-0">
+        <Card className="flex flex-col h-full w-full lg:min-w-0">
+          <CardHeader className="items-center">
             <CardTitle>Risk levels</CardTitle>
             <CardDescription></CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 min-h-0">
+          </CardHeader>
+          <CardContent className="flex-1 w-full flex items-center justify-center">
             <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square"
+            className="w-full  aspect-square"
             >
             <PieChart>
                 <ChartTooltip
@@ -67,8 +67,8 @@ export function ChartPie({riskTotals}: {riskTotals: RiskTotals}) {
                 <Pie data={pieData} dataKey="value" nameKey="name" />
             </PieChart>
             </ChartContainer>
-        </CardContent>
-        {/* <CardFooter className="flex-col gap-2 text-sm">
+          </CardContent>
+          {/* <CardFooter className="flex-col gap-2 text-sm">
             <div className="flex items-center gap-2 leading-none font-medium">
             Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
             </div>

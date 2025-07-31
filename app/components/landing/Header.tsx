@@ -1,11 +1,10 @@
 
-import { Navbar1 } from "./Navbar"
-
+import { Navbar } from "./Navbar"
 
 const Header = () => {
   return (
-    <header className="py-2 flex justify-between items-center">
-      <Navbar1 />
+    <header className="sticky top-0 z-50 py-2 w-full backdrop-blur-sm bg-background/80 border-b border-border/40">
+      <Navbar />
     </header>
   )
 }

@@ -7,21 +7,20 @@ type Message = {
 
 type ChatBotProps = {
     isChatOpen: boolean
+    connectedAccount: string
 }
 
-export default function ChatMessageBox(isChatOpen: ChatBotProps){
-
+export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotProps){
     const [ messages, setMessage ] = useState<Message[]>([]);
     const [ input, setInput ] = useState("")
-
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    console.log('ChatBox', connectedAccount)
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);
 
     const handleSend = async () => {
-        
         if (!input.trim()) return;
 
         const userMsg = { sender: 'user', text: input};
@@ -33,7 +32,7 @@ export default function ChatMessageBox(isChatOpen: ChatBotProps){
             const res = await fetch('http://localhost:8000/chat', {
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query: input, account_id:"acct_1RJ1te2eqcQXQNB8"}),
+                body: JSON.stringify({query: input, account_id: connectedAccount}),
             });
 
             const data = await res.json();

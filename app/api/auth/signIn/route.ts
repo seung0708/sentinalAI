@@ -3,7 +3,6 @@ import {Database} from '@/app/api/types/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest){
-    console.log('Signing in post')
     const supabase = await createClient();
     try{
         const body = await req.json();
@@ -13,7 +12,7 @@ export async function POST(req: NextRequest){
             email: email,
             password: password
         });
-        console.log(authData, dbError)
+        
         if(dbError){
             return NextResponse.json({
                 dbError: "Incorrect email or password",

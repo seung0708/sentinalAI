@@ -66,7 +66,7 @@ export default function SignInForm() {
                             name="email"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel>Email: </FormLabel>
+                                    <FormLabel className="text-base">Email: </FormLabel>
                                     <FormControl>
                                         <Input type="email" placeholder="Email" autoComplete="email" {...field} /> 
                                     </FormControl>
@@ -80,7 +80,7 @@ export default function SignInForm() {
                             name="password"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel>Password: </FormLabel>
+                                    <FormLabel className="text-base">Password: </FormLabel>
                                     <FormControl>
                                         <Input type="password" placeholder="Password" autoComplete="password" {...field} /> 
                                     </FormControl>
@@ -90,7 +90,7 @@ export default function SignInForm() {
                     </div>
                     {error && (<span className="text-red-500">{error}</span>)}
                     <div className="flex flex-col gap-4">
-                        <Button type="submit" className="mt-2 w-full">
+                        <Button type="submit" className="mt-2 w-full text-base">
                             Sign in
                         </Button>
                     </div>
