@@ -6,3 +6,12 @@ Content-Type: application/json
     "email":"SentAI@gmail.com",
     "password":"Sentpass123"
 }
+
+###
+POST http://localhost:5000/chat
+Content-Type: application/json
+
+{
+      "query":"What are my last 5 transactions?",
+    "account_id":"acct_1RJ1te2eqcQXQNB8"    
+}

@@ -8,12 +8,14 @@ import { DataTable } from "@/app/components/users/DataTable";
 import { SectionCards } from "@/app/components/users/SectionCards";
 import { AppSidebar } from "@/app/components/users/Sidebar";
 import { SiteHeader } from "@/app/components/users/site-header";
+import BottomNav from "@/app/components/users/bottom-nav";
 
 
 export default function Dashboard() {
     const [transactions, setTransactions] = useState([])
     const router = useRouter()
 
+    const[ isChatOpen, setIsChatOpen ] =  useState(false);
     useEffect(() => {
         const getUser = async () => {
             const response = await fetch('/api/user')
@@ -30,6 +32,10 @@ export default function Dashboard() {
         getUser()
     }, [])
 
+    const handleClick = () => {
+        setIsChatOpen(!isChatOpen)
+    }
+
     return (
         <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
@@ -41,6 +47,7 @@ export default function Dashboard() {
                 
             </div>
         </div>
+        <BottomNav onChatClick={handleClick}></BottomNav>
     </div>
     )
 }
