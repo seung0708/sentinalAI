@@ -91,20 +91,16 @@ class TransactionChatBot:
             classification = self.llm.invoke(
                 query_classification_prompt.format(query=query)
             ).content.strip()
-            
+            print(classification)
             # get query embedding
             total_count = self._get_total_transaction_count(account_id)
             print(f"[LOG] Total transactions in database: {total_count}")
             if classification == "COUNT":
                 full_txs = self.supabase.table('transactions').select('*').eq('account_id', account_id).execute()
-                print(f"[DEBUG] Total transactions fetched: {len(full_txs.data)}")
-                print(f"[DEBUG] High risk transactions: {sum(1 for tx in full_txs.data if tx['predicted_risk'] == 'high')}")
-                print(f"[DEBUG] High risk customers: {[tx['billing_name'] for tx in full_txs.data if tx['predicted_risk'] == 'high']}")
             else:
                 query_embedding = self.embed_model.embed_query(query)
                 # find similar transactions
                 similar_txs = self._get_similar_transactions(query_embedding, account_id)
-                print(f"[LOG] Similar transactions found: {len(similar_txs)}")
             
                 if not similar_txs:
                     return {"response": "No relevant transactions found."}
@@ -112,17 +108,29 @@ class TransactionChatBot:
                 # get full transaction details
                 matched_ids = [tx['id'] for tx in similar_txs]
                 full_txs = self._get_full_transactions(matched_ids)
-            
-            # format transactions
-            transaction_texts = [
-                self._format_transaction(idx, tx, total_count) 
-                for idx, tx in enumerate(full_txs.data)
-            ]
-            print(f"[LOG] Formatted transactions: {len(transaction_texts)}")
-            context_str = (
+
+            high_risk = [tx for tx in full_txs.data if tx['predicted_risk'] == 'high']
+            medium_risk = [tx for tx in full_txs.data if tx['predicted_risk'] == 'medium']
+            low_risk = [tx for tx in full_txs.data if tx['predicted_risk'] == 'low']
+
+            summary = (
                 f"You have a total of {total_count} transactions.\n"
-                f"Here are ALL transactions in the database, ordered by risk level (high risk ones listed first):\n\n"
-            ) + "\n".join(transaction_texts)
+                f"Summary by risk level:\n"
+                f"- High Risk: {len(high_risk)} transactions\n"
+                f"- Medium Risk: {len(medium_risk)} transactions\n"
+                f"- Low Risk: {len(low_risk)} transactions\n\n"
+                f"Here are ALL transactions, grouped by risk level (high risk first):\n\n"
+            )
+
+            # format transactions
+            transaction_texts = (
+                [self._format_transaction(idx, tx, total_count) for idx, tx in enumerate(high_risk)] +
+                [self._format_transaction(idx + len(high_risk), tx, total_count) for idx, tx in enumerate(medium_risk)] +
+                [self._format_transaction(idx + len(high_risk) + len(medium_risk), tx, total_count) for idx, tx in enumerate(low_risk)]
+            )
+            print(f"[LOG] Formatted transactions: {len(transaction_texts)}")
+            
+            context_str = summary + "\n".join(transaction_texts)
             
             # create chat prompt
             template = """
