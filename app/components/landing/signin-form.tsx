@@ -48,7 +48,7 @@ export default function SignInForm() {
             if(result.status === 200) {
                 router.push('/dashboard')
             } else if (result.status === 400) {
-                setError(result.dbError)
+                setError(result.error)
             }
 
         } catch (error) {

@@ -1,6 +1,7 @@
 "use client"
 
 import {useForm} from "react-hook-form";
+import { useRouter } from "next/navigation";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod"
 
@@ -17,7 +18,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignUpForm() {
-
+    const router = useRouter()
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema), 
         defaultValues: {
@@ -42,8 +43,11 @@ export default function SignUpForm() {
             if(!response.ok) {
                 throw new Error ('Failed to Sign Up')
             }
-        
 
+            const result = await response.json();
+            if(result.status === 200) {
+                router.push('/signin')
+            } 
         } catch (error) {
             console.error(error)
         }
