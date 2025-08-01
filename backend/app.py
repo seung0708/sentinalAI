@@ -28,7 +28,7 @@ CORS(app)
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
 chatbot = TransactionChatBot(supabase, openai_api_key)
 
-model = joblib.load('/Users/magsz/Documents/VS Code/Projects/sentinalAI/backend/fraud_models.joblib')
+model = joblib.load('./model/fraud_models.joblib')
 
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
