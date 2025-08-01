@@ -124,7 +124,7 @@ class TransactionChatBot:
             Do not explicitly mention internal field names like "billing_line1" — instead, refer to them naturally as "the billing address" or "the transaction location."
 
             When responding:
-            - If asked about counts (e.g., "how many are high risk?"), respond **only** with the count and the names of the customers who made those transactions, **without mentioning other risk levels or extra details**.
+            - "If asked about counts (e.g., "how many are high risk?"), respond with the total count and list ALL customers who made transactions of that risk level.
             - If asked for explanations about specific risk levels, generate explanations **only** for those risk levels requested in the question.
             - Do **not** mention numeric probabilities, risk scores, or vague terms like "high risk associated with the address."
             - Instead, describe concrete anomalies based on the transaction data as shown above.
