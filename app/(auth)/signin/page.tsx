@@ -12,7 +12,7 @@ const Page = () => {
                     </div>
                     <SignInForm />
                     <div className="flex justify-center gap-1 text-sm">
-                        <p className="text-base text-gray-200/90">Don't have an account?</p>
+                        <p className="text-base text-gray-200/90">Don&apos;t have an account?</p>
                         <Link href="/signup" className="font-medium hover:underline text-base">
                             Sign up
                         </Link>

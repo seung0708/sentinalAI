@@ -15,6 +15,11 @@ export type RiskSummary = {
   total: number;  
 };
 
+type Transaction = {
+  timestamp: string;
+  predicted_risk: 'low' | 'medium' | 'high';
+}
+
 function getLastSixMonths(): string[] {
   const months: string[] = [];
   const now = new Date();
@@ -29,7 +34,7 @@ function getLastSixMonths(): string[] {
   return months;
 }
 
-function groupTransactions(transactions: any) {
+function groupTransactions(transactions: Transaction[]) {
   const lastSixMonths = getLastSixMonths();
   const grouped: Record<string, { low: number; med: number; high: number }> = {};
 
@@ -38,7 +43,7 @@ function groupTransactions(transactions: any) {
   }
   
   for (const tx of transactions) {
-    const monthKey = new Date(tx.timestamp).toISOString().slice(0, 7); // 'YYYY-MM'
+    const monthKey = new Date(tx.timestamp).toISOString().slice(0, 7); 
     if (grouped[monthKey]) {
       if (tx.predicted_risk === 'low') grouped[monthKey].low += 1;
       else if (tx.predicted_risk === 'medium') grouped[monthKey].med += 1;
@@ -62,7 +67,7 @@ function groupTransactions(transactions: any) {
 
 export default function Analytics() {
   const [past6months, setPast6months] = useState<RiskSummary[]>([])
-  const riskTotals = past6months.reduce((acc, curr: any) => {
+  const riskTotals = past6months.reduce((acc, curr: RiskSummary) => {
     acc.low += curr.low 
     acc.med += curr.med 
     acc.high += curr.high

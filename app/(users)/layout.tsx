@@ -22,7 +22,7 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
             setConnectedAccount(result.connectedAccount.account_id)
         }
         getUser()
-    }, [])
+    }, [router])
 
     const handleClick = () => {
         setIsChatOpen(!isChatOpen)

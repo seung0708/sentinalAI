@@ -13,6 +13,13 @@ export type ChartEntry = {
   high: number;
 };
 
+export type Summary = {
+    total: number, 
+    low: number, 
+    med: number, 
+    high: number
+}
+
 type GroupedResult = {
   [key: string]: ChartEntry;
 };
@@ -31,7 +38,7 @@ export type Top5RiskyCustomers = {
 }
 
 export default function Dashboard() {
-    const [summary, setSummary] = useState({})
+    const [summary, setSummary] = useState<Summary>({total: 0, low: 0, med: 0, high: 0})
     const [chartData, setChartData] = useState<ChartEntry[]>([])
     const [topRisky, setTopRisky] = useState<Top5RiskyCustomers[]>([])
     const [timeRange, setTimeRange] = useState('7d')

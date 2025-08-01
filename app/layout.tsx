@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat,  Source_Code_Pro} from "next/font/google";
+import { Montserrat} from "next/font/google";
 import { AuthProvider } from "./context/authContext";
 import "./globals.css";
 
@@ -9,11 +9,11 @@ const montserrat = Montserrat({
   style: ['normal', 'italic']
 });
 
-const sourceCodePro = Source_Code_Pro({
-  subsets: ["latin"],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic']
-});
+// const sourceCodePro = Source_Code_Pro({
+//   subsets: ["latin"],
+//   weight: ['400', '500', '600', '700'],
+//   style: ['normal', 'italic']
+// });
 
 export const metadata: Metadata = {
   title: "SentinelAI",

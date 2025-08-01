@@ -1,8 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
-import {Database} from '@/app/api/types/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async  function POST(req: NextRequest){
+export async  function POST(){
     const supabase = await createClient();
     try{
 
@@ -22,8 +21,8 @@ export async  function POST(req: NextRequest){
         )
 
     } catch(error){
-
-        return NextResponse.json({error: "Server error"}, {
+        console.error(error)
+        return NextResponse.json({err: "Server error"}, {
             status: 500,
             headers: {'Content-Type': 'application/json'}
         })

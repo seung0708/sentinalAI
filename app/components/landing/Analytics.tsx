@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 const Analytics = () => {
     return (
         <section id="analytics" className="mt-12 w-full scroll-mt-24">
@@ -9,11 +11,13 @@ const Analytics = () => {
                     Get real-time insights into transaction patterns, fraud trends, and risk metrics with our intuitive analytics dashboard.
                 </p>
                 <div className="bg-[#112d2b]/60 rounded-xl p-4 md:p-6 lg:p-8">
-                    <img
+                    <Image
                         src="/analytics2.png"
                         alt="SentinelAI Analytics Dashboard"
                         className="w-full rounded-xl shadow-xl object-cover max-h-[700px]"
-                    />
+                        fill
+                        priority
+                        />
                 </div>
             </div>
         </section>

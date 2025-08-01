@@ -1,8 +1,9 @@
 "use client"
 
+import React from "react"; 
+
 import DraggableRow from "./DragableRow";
 
-import React, {useEffect, useState} from "react"; 
 import { DndContext, KeyboardSensor, MouseSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent, type UniqueIdentifier, } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, arrayMove, verticalListSortingStrategy, } from "@dnd-kit/sortable";
@@ -14,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import { Table, TableBody, TableCell,  TableHead, TableHeader, TableRow, } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsTrigger, } from "@/components/ui/tabs"
+import { Tabs, TabsContent, } from "@/components/ui/tabs"
 
 export const schema = z.object({
   id: z.string(),

@@ -1,15 +1,19 @@
 import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../../lib/stripe";
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST() {
     let accountId;
     const supabase = await createClient();
     const {data: {user}, error} = await supabase.auth.getUser();
 
+    console.log('user error', error)
+
     const {data: connectedAccount, error: accountIdError} = await supabase.from("connected_accounts").select("*").eq("user_id", user?.id).single();
     accountId = connectedAccount?.account_id; 
+
+    console.log('accountIdError', accountIdError)
 
     try {
         
@@ -25,6 +29,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 provider: "stripe", 
                 account_id: accountId
             })
+
+            console.log('insert error', error)
 
         }
 
@@ -45,6 +51,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
 
     } catch(error) {
+        console.error(error)
         return NextResponse.json({
             status: 400, 
             message: "Error occured when onboarding"

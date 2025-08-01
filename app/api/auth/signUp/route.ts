@@ -33,11 +33,11 @@ export async function POST(req: NextRequest){
             auth_id: authData.user?.id ?? '' // optional chaining - checks if authData.user.id is not null if valid then acces it. if invalid then set empty string
         }
     
-        const {data, error } = await supabase.from('users').insert(newUser);
+        const {error } = await supabase.from('users').insert(newUser);
     
         if(error){
-            // console.log(error)
-            return NextResponse.json({error: "Could not sign up user"}, {
+            console.error(error)
+            return NextResponse.json({err: "Could not sign up user"}, {
                 status:500,
                 headers: {'Content-Type': 'application/json'}
             });
@@ -46,8 +46,8 @@ export async function POST(req: NextRequest){
         return NextResponse.json({message: "Sign Up Succesful"})
 
     } catch(error){
-        // console.log(error)
-        return NextResponse.json({error: "Server error", message:"Failed to reach server"}, {
+        console.error(error)
+        return NextResponse.json({err: "Server error", message:"Failed to reach server"}, {
             status: 500,
             headers: {'Content-Type': 'application/json'}
         })

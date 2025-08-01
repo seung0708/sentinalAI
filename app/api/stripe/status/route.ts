@@ -7,6 +7,8 @@ export async function GET() {
     const supabase = await createClient(); 
     const {data: {user}, error: userError} = await supabase.auth.getUser(); 
 
+    console.log('user error api/stripe/status', userError)
+
     if (!user) {
         return NextResponse.json({
             error: 'Unauthorized', 
@@ -32,6 +34,7 @@ export async function GET() {
         });
 
     } catch (err) {
+        console.error(err)
         return NextResponse.json({ error: 'Failed to retrieve Stripe account' }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState, useEffect, useContext, createContext } from 'react';
+import React, { useState, useContext, createContext } from 'react';
 
 interface User {
     id?: string; 
@@ -44,11 +44,12 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (!response.ok) {
                 return {
                     error: result.error || 'Failed to sign in'
                 };
             }
+            setUser(result)
             return result;
         } catch (error) {
             console.error("Error signing in", error)

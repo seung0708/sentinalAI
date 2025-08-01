@@ -1,19 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {useEffect, useState} from "react";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const StripeCard = () => {
-  const router = useRouter();
   const [isConnected, setIsConnected] = useState(false)
   const [currentlyDue, setCurrentlyDue] = useState<string[]>([])
-  const [pastDue, setPastDue] = useState<any[]>([])
+  const [pastDue, setPastDue] = useState<string[]>([])
   const [disabledReason, setDisabledReason] = useState(null)
-  const [chargesEnabled, setChargesEnabled] = useState(false); 
-  const [payoutsEnabled, setPayoutsEnabled] = useState(false)
+  // const [chargesEnabled, setChargesEnabled] = useState(false); 
+  // const [payoutsEnabled, setPayoutsEnabled] = useState(false)
 
   useEffect(() => {
     const fetchStripeAccount = async () => {
@@ -29,12 +27,17 @@ export const StripeCard = () => {
         setPastDue(prev => [...prev, past_due]);
         setDisabledReason(disabledReason);
         setIsConnected(isConnected)
+
+        console.log('pastDue', pastDue)
+        console.log('currentlyDue', currentlyDue)
+        console.log('disabledReason', disabledReason)
+        
       }
 
     }
 
     fetchStripeAccount()
-  },[])
+  },[isConnected, currentlyDue, pastDue, disabledReason])
 
     const handleConnectStripe = async () => {
         try {
@@ -52,7 +55,7 @@ export const StripeCard = () => {
             }
             
         } catch (error) {
-
+          console.log(error)
         }
     }
 

@@ -1,3 +1,6 @@
+
+import Image from "next/image"
+
 const Solutions = () => {
     return (
         <section id="solutions" className="mt-12 w-full scroll-mt-24">
@@ -16,10 +19,12 @@ const Solutions = () => {
                             </p>
                         </div>
                         <div className="relative h-64 md:h-auto">
-                            <img
+                            <Image
                                 src="/fraud.png"
                                 alt="Real-time fraud protection visualization"
                                 className="w-full h-full object-contain"
+                                fill
+                                priority
                             />
                         </div>
                     </div>
@@ -33,10 +38,12 @@ const Solutions = () => {
                             </p>
                         </div>
                         <div className="relative h-64 md:h-auto md:order-1">
-                            <img
+                            <Image
                                 src="/reports.png"
                                 alt="Automated incident reports dashboard"
                                 className="w-full h-full object-contain"
+                                fill
+                                priority
                             />
                         </div>
                     </div>
@@ -50,10 +57,12 @@ const Solutions = () => {
                             </p>
                         </div>
                         <div className="relative h-64 md:h-auto">
-                            <img
+                            <Image
                                 src="/analytics.png"
                                 alt="Advanced analytics dashboard"
                                 className="w-full h-full object-contain"
+                                fill
+                                priority
                             />
                         </div>
                     </div>

@@ -1,7 +1,6 @@
 "use client"
-import React, {useEffect, useState} from "react"
+
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
   CardContent,
@@ -15,18 +14,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
-import { time } from "console"
 
 const chartConfig = {
     visitors: {
@@ -51,6 +38,9 @@ import {ChartEntry} from '@/app/(users)/dashboard/page'
   }
 
 export const MultipleBarChart: React.FC<ChartProps> = ({ timeRange, onRangeChange, chartData}) => {
+    console.log('chartData', chartData)
+    console.log('timeRange', timeRange)
+    console.log('onRangeChange', onRangeChange)
     return (
         <Card className="@container/cad">
             <CardHeader className="relative">

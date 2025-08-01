@@ -1,17 +1,17 @@
-import DragHandle from "./DragHandle"
-import TableCellViewer from "./TableCellView"
+//import DragHandle from "./DragHandle"
+//import TableCellViewer from "./TableCellView"
 
 import { ColumnDef } from "@tanstack/react-table"
 import {schema} from './DataTable'
 import { z } from "zod"
-import { Checkbox } from "@/components/ui/checkbox"
+//import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { CheckCircle2Icon, LoaderIcon, MoreVerticalIcon } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+//import { Button } from "@/components/ui/button"
+import { CheckCircle2Icon, LoaderIcon } from "lucide-react"
+//import { Label } from "@/components/ui/label"
+//import { Input } from "@/components/ui/input"
+//import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
+//import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 
 export const columns: ColumnDef<z.infer<typeof schema>>[] = [
   // {

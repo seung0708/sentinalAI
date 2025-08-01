@@ -1,16 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import { stripe } from "../lib/stripe";
 import { testData } from "./test-data";
-import Stripe from "stripe";
-
-type PaymentIntentWithCharges = Stripe.PaymentIntent & {
-    charges: Stripe.ApiList<Stripe.Charge>;
-  };
-  
 
 export const createPaymentIntent = async (accountId: string) => {
-    const supabase = await createClient()
     const transactions = testData.filter(transaction => transaction.billing_details?.name == 'Tyler Fox')
     const {amount, currency, billing_details, payment_method} = transactions[1]
     let customer

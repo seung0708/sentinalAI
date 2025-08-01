@@ -32,15 +32,6 @@ const sections = [
   },
 ];
 
-interface Footer7Props {
-  logo?: {
-    url: string;
-    src: string;
-    alt: string;
-    title: string;
-  };
-}
-
 const Footer = () => {
     return (
       <footer className="mt-24 bg-[#112d2b]/60 rounded-t-xl">
@@ -48,10 +39,13 @@ const Footer = () => {
           <div className="flex flex-col items-center justify-between gap-8 sm:gap-12 lg:gap-16 lg:flex-row lg:items-center lg:justify-between">
             <div className="sm:w-auto flex flex-col items-center gap-6 sm:gap-8">
               <Link href="/" className="inline-block">
-                <img
+                <Image
                   src='/logo.svg'
                   alt='SentinelAI logo'
                   className="h-8 w-auto"
+                  width={100}
+                  height={100}
+                  priority
                 />
               </Link>
               <ul className="flex items-center space-x-6">

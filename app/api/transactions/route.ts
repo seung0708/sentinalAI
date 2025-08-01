@@ -29,6 +29,8 @@ export async function GET(request: Request){
     //console.log('fetch user error: ', fechUserError) 
     const {data: connectedAccount, error: fetchConnectAccError} = await supabase.from('connected_accounts').select('account_id').eq('user_id', user?.id).single()
 
+    console.log('fetchConnectAccError', fetchConnectAccError)
+
     if (page === 'transactions') {
         try {
             const {data, error: fetchTransactionsError} = await supabase.from('transactions')
@@ -56,6 +58,8 @@ export async function GET(request: Request){
 
             //Bar chart
             const {data: timestampRisks, error: fetchRisksError} = await supabase.from('transactions').select('timestamp, predicted_risk', {count: 'exact'}).eq('account_id', connectedAccount?.account_id).gte('timestamp', startDate.toISOString())
+            
+            console.log('fetchRisksError', fetchRisksError)
             
             const grouped = timestampRisks?.reduce((acc: GroupedData, tx) => {
                 const day = new Date(tx.timestamp).toISOString().slice(0, 10); // 'YYYY-MM-DD'

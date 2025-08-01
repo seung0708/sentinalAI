@@ -15,7 +15,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
     const [ input, setInput ] = useState("")
     const messagesEndRef = useRef<HTMLDivElement>(null);
     console.log('ChatBox', connectedAccount)
-
+    console.log('isChatOpen', isChatOpen)
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);

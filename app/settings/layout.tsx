@@ -1,5 +1,3 @@
-import Image from "next/image"
-
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "../components/settings/sidebar-nav"
 
