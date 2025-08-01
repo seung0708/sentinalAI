@@ -22,7 +22,7 @@ supabase = create_client(url, key)
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-app = Flask(__name__)
+app = Flask(__name__) 
 CORS(app)
 
 transaction_processor = TransactionProcessor(supabase, openai_api_key)
@@ -73,4 +73,5 @@ def chat():
     return chatbot.chat(query, account_id)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    port = int(os.getenv("PORT", 8000))
+    app.run(host='0.0.0.0', debug=True, port=port)
