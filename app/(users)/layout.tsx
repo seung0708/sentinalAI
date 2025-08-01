@@ -17,7 +17,7 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
             const response = await fetch('/api/user')
             const result = await response.json()
             if(!result.user) {
-                router.push('/login');
+                router.replace('/login');
             }               
             setConnectedAccount(result.connectedAccount.account_id)
         }
