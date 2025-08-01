@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from 'stripe'
 import {stripe} from '@/app/api/lib/stripe'
 import { createClient } from "@/utils/supabase/server";
-
+ 
 export async function POST(req: NextRequest){
     const supabase = await createClient();
 
