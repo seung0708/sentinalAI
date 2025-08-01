@@ -23,7 +23,8 @@ const Solutions = () => {
                                 src="/fraud.png"
                                 alt="Real-time fraud protection visualization"
                                 className="w-full h-full object-contain"
-                                fill
+                                width={500}
+                                height={300}
                                 priority
                             />
                         </div>
@@ -42,7 +43,8 @@ const Solutions = () => {
                                 src="/reports.png"
                                 alt="Automated incident reports dashboard"
                                 className="w-full h-full object-contain"
-                                fill
+                                width={500}
+                                height={300}
                                 priority
                             />
                         </div>
@@ -57,11 +59,12 @@ const Solutions = () => {
                             </p>
                         </div>
                         <div className="relative h-64 md:h-auto">
-                            <Image
+                        <Image
                                 src="/analytics.png"
                                 alt="Advanced analytics dashboard"
                                 className="w-full h-full object-contain"
-                                fill
+                                width={500}
+                                height={300}
                                 priority
                             />
                         </div>
