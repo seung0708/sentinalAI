@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from 'stripe'
-import {stripe} from '@/app/api/lib/stripe'
+import {getStripe} from '@/app/api/lib/stripe'
 import { createClient } from "@/utils/supabase/server";
  
 export async function POST(req: NextRequest){
     const supabase = await createClient();
-
+    const stripe = getStripe()
     const rawBody = await req.text();
     const sig = req.headers.get('stripe-signature') as string
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+    if (!stripe) {
+        return NextResponse.json({ error: "Stripe not initialized" }, { status: 500 });
+    }
 
     let event: Stripe.Event
 
