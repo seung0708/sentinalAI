@@ -118,7 +118,7 @@ class TransactionChatBot:
             print(f"[LOG] Formatted transactions: {len(transaction_texts)}")
             context_str = (
                 f"You have a total of {total_count} transactions.\n"
-                f"Here are selected transactions with varying risk levels (high risk ones listed first):\n\n"
+                f"Here are ALL transactions in the database, ordered by risk level (high risk ones listed first):\n\n"
             ) + "\n".join(transaction_texts)
             
             # create chat prompt
