@@ -20,7 +20,7 @@ openai_api_key= os.getenv('OPENAI_API_KEY')
 
 supabase = create_client(url, key)
 
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY1")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 app = Flask(__name__)
 CORS(app)
