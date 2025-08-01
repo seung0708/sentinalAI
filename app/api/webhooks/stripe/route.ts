@@ -74,7 +74,7 @@ export async function POST(req: NextRequest){
                     return NextResponse.json({error: 'Error retrieving transactions from database', status: 500})
                 }
                 
-                const data = await fetch('http://localhost:8000/predict-fraud', {
+                const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/predict-fraud`, {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json',    
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest){
 
 
 
-                const indexTransaction = await fetch('http://localhost:8000/index-transaction', {
+                const indexTransaction = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json'

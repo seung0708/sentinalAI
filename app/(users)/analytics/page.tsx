@@ -2,7 +2,6 @@
 
 import {useEffect, useState} from "react"
 
-import { TimeRangeSelector } from "@/app/components/users/analytics/TimeRangeSelector"
 import { RiskChart } from "@/app/components/users/analytics/RiskChart"
 import { ChartPie } from "@/app/components/users/analytics/PieChart"
 import { ChartBarHorizontal } from "@/app/components/users/analytics/HorizontalBarChart"
@@ -13,7 +12,7 @@ export type RiskSummary = {
   low: number;
   med: number;
   high: number;
-  total: number;
+  total: number;  
 };
 
 function getLastSixMonths(): string[] {

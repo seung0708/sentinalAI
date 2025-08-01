@@ -7,7 +7,7 @@ export default function Transactions() {
     const [transactions, setTransactions] = useState([]) 
     useEffect(() => {
         const fetchTransactions = async () => {
-            const res = await fetch('http://localhost:3000/api/transactions?page=transactions', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/transactions?page=transactions`, {
                 cache: 'no-store',
                 credentials: 'include'
             });

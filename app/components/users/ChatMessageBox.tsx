@@ -29,7 +29,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
 
         try {
 
-            const res = await fetch('http://localhost:8000/chat', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({query: input, account_id: connectedAccount}),

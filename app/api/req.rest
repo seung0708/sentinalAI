@@ -17,10 +17,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/api/analytics
+GET ${process.env.NEXT_PUBLIC_APP_URL}/api/analytics
 
 ###
-POST http://localhost:3000/api/auth/signUp 
+POST ${process.env.NEXT_PUBLIC_APP_URL}/api/auth/signUp 
 Content-Type: "application/json"
 
 {
