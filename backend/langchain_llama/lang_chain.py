@@ -97,6 +97,9 @@ class TransactionChatBot:
             print(f"[LOG] Total transactions in database: {total_count}")
             if classification == "COUNT":
                 full_txs = self.supabase.table('transactions').select('*').eq('account_id', account_id).execute()
+                print(f"[DEBUG] Total transactions fetched: {len(full_txs.data)}")
+                print(f"[DEBUG] High risk transactions: {sum(1 for tx in full_txs.data if tx['predicted_risk'] == 'high')}")
+                print(f"[DEBUG] High risk customers: {[tx['billing_name'] for tx in full_txs.data if tx['predicted_risk'] == 'high']}")
             else:
                 query_embedding = self.embed_model.embed_query(query)
                 # find similar transactions
