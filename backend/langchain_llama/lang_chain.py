@@ -77,23 +77,39 @@ class TransactionChatBot:
     def chat(self, query, account_id):
         try:
             print(f"[LOG] Query received: {query} for account: {account_id}")
+
+            query_classification_prompt = """
+            Classify the following query as either:
+            1. "COUNT" - asking about numbers, totals, or summaries of transactions
+            2. "SPECIFIC" - asking about specific transactions or details
+            
+            Query: {query}
+            
+            Respond with only one word: COUNT or SPECIFIC
+            """
+
+            classification = self.llm.invoke(
+                query_classification_prompt.format(query=query)
+            ).content.strip()
             
             # get query embedding
             total_count = self._get_total_transaction_count(account_id)
             print(f"[LOG] Total transactions in database: {total_count}")
-            query_embedding = self.embed_model.embed_query(query)
+            if classification == "COUNT":
+                full_txs = self.supabase.table('transactions').select('*').eq('account_id', account_id).execute()
+            else:
+                query_embedding = self.embed_model.embed_query(query)
+                # find similar transactions
+                similar_txs = self._get_similar_transactions(query_embedding, account_id)
+                print(f"[LOG] Similar transactions found: {len(similar_txs)}")
             
-            # find similar transactions
-            similar_txs = self._get_similar_transactions(query_embedding, account_id)
-            print(f"[LOG] Similar transactions found: {len(similar_txs)}")
-            
-            if not similar_txs:
-                return {"response": "No relevant transactions found."}
+                if not similar_txs:
+                    return {"response": "No relevant transactions found."}
                 
-            # get full transaction details
-            matched_ids = [tx['id'] for tx in similar_txs]
-            full_txs = self._get_full_transactions(matched_ids)
-        
+                # get full transaction details
+                matched_ids = [tx['id'] for tx in similar_txs]
+                full_txs = self._get_full_transactions(matched_ids)
+            
             # format transactions
             transaction_texts = [
                 self._format_transaction(idx, tx, total_count) 
