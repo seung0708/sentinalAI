@@ -1,11 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
-import { stripe } from "../../lib/stripe";
+import { getStripe } from "../../lib/stripe";
 
 import { NextResponse } from "next/server";
 
 export async function POST() {
     let accountId;
     const supabase = await createClient();
+    const stripe = getStripe()
     const {data: {user}, error} = await supabase.auth.getUser();
 
     console.log('user error', error)
@@ -19,10 +20,10 @@ export async function POST() {
         
 
         if (!accountId) {
-            const account = await stripe.accounts.create({
+            const account = await stripe?.accounts.create({
                 type: 'standard'
             });
-            accountId = account.id
+            accountId = account?.id
 
             const {error} = await supabase.from("connected_accounts").insert({
                 user_id: user?.id, 
@@ -36,7 +37,7 @@ export async function POST() {
 
         console.log('accountId', accountId)
 
-        const accountLink = await stripe.accountLinks.create({
+        const accountLink = await stripe?.accountLinks.create({
             account: accountId, 
             refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/integrations`, 
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/integrations`,
