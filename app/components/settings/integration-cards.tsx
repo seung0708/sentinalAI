@@ -25,7 +25,7 @@ export const StripeCard = () => {
     }
 
     fetchStripeAccount()
-  },[])
+  },[isConnected])
 
     const handleConnectStripe = async () => {
       try {
