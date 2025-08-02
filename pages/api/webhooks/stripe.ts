@@ -44,7 +44,8 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
     try {
         try {
             event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
-            console.log('event',event)
+            console.log('Received event type:', event, event.type);
+            console.log('Connected account id:', event.account);
         } catch (err) {
             console.error('Signature verification failed:', err)
             return res.status(400).send(`Webhook Error: ${err}`)
