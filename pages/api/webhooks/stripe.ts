@@ -91,13 +91,19 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 //     billing_details: customerFromStripe?.billing_details
                 // })
 
-                const paymentMethod = await stripe.customers.retrievePaymentMethod(
-                    customerFromStripe[0]?.id,
+                const paymentMethod = await stripe.paymentMethods.retrieve(
                     payment_method as string
                 );
 
                 console.log('paymentMethod', paymentMethod)
 
+                const attachPaymentMethod = await stripe.paymentMethods.attach(
+                    paymentMethod.id, 
+                    {
+                        customer: customerFromStripe[0]?.id
+                    }
+                )
+                console.log('attachPaymentMethod', attachPaymentMethod)
                 console.log('charges data', charges?.data)
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
