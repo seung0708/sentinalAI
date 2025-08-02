@@ -12,15 +12,24 @@ export async function GET(){
     }
 
     const {data: connectedAccount, error: fetchConnectAccError} = await supabase.from('connected_accounts').select('account_id').eq('user_id', user?.id).single()
-
-    if(fetchConnectAccError) {
+    if(fetchConnectAccError?.code === 'PGRST116') {
+        console.log('user isnt connected to stripe')
+    } else {
         console.error(fetchConnectAccError)
     }
-    
-    return NextResponse.json({
+
+    console.log('connected account', connectedAccount)
+
+    if (!connectedAccount) {
+        return NextResponse.json({
+            user,
+            status: 200
+        }); 
+    } else {
+        return NextResponse.json({
         user,
         connectedAccount,
         status: 200
     }); 
-   
+    }
 }

@@ -25,11 +25,14 @@ export async function GET(request: Request){
     
     const supabase = await createClient()
     const {data: {user}, error: fechUserError} = await supabase.auth.getUser()
-    if(!user) redirect('/signin')
-    //console.log('fetch user error: ', fechUserError) 
+    if(!user) redirect('/signin') 
+    console.log('fetch user error: ', fechUserError) 
     const {data: connectedAccount, error: fetchConnectAccError} = await supabase.from('connected_accounts').select('account_id').eq('user_id', user?.id).single()
 
-    console.log('fetchConnectAccError', fetchConnectAccError)
+    if (!connectedAccount && fetchConnectAccError) {
+        if (fetchConnectAccError.code === 'PGRST116') console.log('no stripe account_id connected yet to this user so continuing with logic')
+        else console.error(fetchConnectAccError)    
+    }
 
     if (page === 'transactions') {
         try {
@@ -40,12 +43,10 @@ export async function GET(request: Request){
                 billing_postal_code, payment_method, predicted_risk`
             )
             .eq('account_id', connectedAccount?.account_id)
-        
-            if (fetchTransactionsError) {
-                console.error(fechUserError) 
-                return NextResponse.json({error: fetchTransactionsError})
-            }
-            
+
+            if (data?.length === 0 && !fetchTransactionsError) console.log('customer doesnt have transactions yet')
+            else console.error(fetchTransactionsError)
+         
             return NextResponse.json(data)
         } catch(error) {
             console.error('Error: ', error)
@@ -59,7 +60,7 @@ export async function GET(request: Request){
             //Bar chart
             const {data: timestampRisks, error: fetchRisksError} = await supabase.from('transactions').select('timestamp, predicted_risk', {count: 'exact'}).eq('account_id', connectedAccount?.account_id).gte('timestamp', startDate.toISOString())
             
-            console.log('fetchRisksError', fetchRisksError)
+            if (fetchRisksError?.code === 'PGRST202') console.log('customer doesnt have a account_id yet')
             
             const grouped = timestampRisks?.reduce((acc: GroupedData, tx) => {
                 const day = new Date(tx.timestamp).toISOString().slice(0, 10); // 'YYYY-MM-DD'
@@ -72,6 +73,8 @@ export async function GET(request: Request){
 
             //Summary cards
             const {data: risks, error: fetchTransactionsError} = await supabase.from('transactions').select('predicted_risk').eq('account_id', connectedAccount?.account_id)
+            console.error('fetchTransactionsError', fetchTransactionsError)
+
             const total = risks?.length
             const riskCounts = risks?.reduce((acc: Record<RiskLevel, number>, tx) => {
                 const risk = tx.predicted_risk as RiskLevel;
@@ -84,11 +87,6 @@ export async function GET(request: Request){
                 low: riskCounts?.low, 
                 med: riskCounts?.medium, 
                 high: riskCounts?.high
-            }
-
-             if (fetchTransactionsError) {
-                console.error(fechUserError) 
-                return NextResponse.json({error: fetchTransactionsError})
             }
 
             //Customer
@@ -110,7 +108,6 @@ export async function GET(request: Request){
 
     if (summary === 'true') {
         try {
-            
             return NextResponse.json(summary)
         } catch(error) {
             console.error('Error getting transactions', error)

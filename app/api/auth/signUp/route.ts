@@ -17,7 +17,6 @@ export async function POST(req: NextRequest){
             email: email,
             password: password
         });
-
         if (dbError){
             return NextResponse.json(
                 {error: "Auth sign up failed", details: dbError.message},

@@ -7,74 +7,62 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export const StripeCard = () => {
   const [isConnected, setIsConnected] = useState(false)
-  const [currentlyDue, setCurrentlyDue] = useState<string[]>([])
-  const [pastDue, setPastDue] = useState<string[]>([])
-  const [disabledReason, setDisabledReason] = useState(null)
-  // const [chargesEnabled, setChargesEnabled] = useState(false); 
-  // const [payoutsEnabled, setPayoutsEnabled] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchStripeAccount = async () => {
       const response = await fetch("/api/stripe/status");
-      const {currently_due, past_due, disabled_reason, charges_enabled, payouts_enabled} = await response.json();
-      
-      console.log(currently_due, past_due, disabled_reason, charges_enabled, payouts_enabled)
+      const { message } = await response.json();
 
-      if(currently_due.length === 0 && past_due.length === 0 && !disabled_reason && charges_enabled && payouts_enabled) {
+      if(message === 'connected') {
         setIsConnected(!isConnected)
-      } else {
-        setCurrentlyDue(prev => [...prev, ...currently_due])
-        setPastDue(prev => [...prev, past_due]);
-        setDisabledReason(disabledReason);
-        setIsConnected(isConnected)
+      } 
 
-        console.log('pastDue', pastDue)
-        console.log('currentlyDue', currentlyDue)
-        console.log('disabledReason', disabledReason)
-        
+      if (message === 'incomplete') {
+        setError('Please complete the Stripe onboarding process.')
       }
 
     }
 
     fetchStripeAccount()
-  },[isConnected, currentlyDue, pastDue, disabledReason])
+  },[])
 
     const handleConnectStripe = async () => {
-        try {
-            const response = await fetch("/api/stripe/onboard", {
-              method:'POST', 
-              headers: {
-                "Content-Type": "application/json"
-              }
-            })
+      try {
+        const response = await fetch("/api/stripe/onboard", {
+          method:'POST', 
+          headers: {
+             "Content-Type": "application/json"
+          }
+        })
 
-            const {accountLink} = await response.json();
-            console.log(accountLink)
-            if(accountLink) {
-              window.location.href = accountLink.url;
-            }
-            
-        } catch (error) {
-          console.log(error)
+        const {accountLink} = await response.json();
+        if(accountLink) {
+          window.location.href = accountLink.url;
         }
+            
+      } catch (error) {
+      console.log(error)
     }
+  }
 
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Stripe</CardTitle>
-            <CardDescription>
-                Connect your Stripe account to start monitoring transactions in real time.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {isConnected ? "Connected" : "Not Connected"}
-          </div>
-          <Button onClick={handleConnectStripe}>
-            {isConnected ? "Reconnect" : "Connect Stripe"}
-          </Button>
-        </CardContent>
-      </Card>
-    )
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Stripe</CardTitle>
+        <CardDescription>
+          Connect your Stripe account to start monitoring transactions in real time.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          {isConnected ? "Connected" : "Not Connected"}
+        </div>
+        <Button onClick={handleConnectStripe}>
+          {isConnected ? "Reconnect" : "Connect Stripe"}
+        </Button>
+      </CardContent>
+      {error && (<span className="text-red-500">{error}</span>)}
+    </Card>
+  )
 }

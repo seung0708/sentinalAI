@@ -1,23 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe'
 import {getStripe} from '@/app/api/lib/stripe'
-import { createClient } from "@/utils/supabase/server";
+//import { createClient } from "@/utils/supabase/server";
+import { buffer } from 'micro';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+function createClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY! // use a service key if needed, or anon key if no auth needed
+  );
+}
+
+export const config = {
+    api: {
+      bodyParser: false,
+    },
+  }
  
-export async function POST(req: NextRequest){
+export default async function handler (req: NextApiRequest, res: NextApiResponse){
+
+    if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST');
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const supabase = await createClient();
     const stripe = getStripe()
-    const rawBody = await req.text();
-    const sig = req.headers.get('stripe-signature') as string
+    const rawBody = (await buffer(req)).toString()
+    const sig = req.headers['stripe-signature'] as string
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
+    console.log('rawBody', rawBody)
+    console.log('sig', sig)
+    console.log('endpointSecret', endpointSecret)
+
     if (!stripe) {
-        return NextResponse.json({ error: "Stripe not initialized" }, { status: 500 });
+        return res.status(500).json({ error: "Stripe not initialized" });
     }
 
     let event: Stripe.Event
 
     try {
-        event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
+        try {
+            event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+            console.log('event',event)
+        } catch (err: any) {
+            console.error('Signature verification failed:', err.message)
+            return res.status(400).send(`Webhook Error: ${err.message}`)
+        }
         // handle Stripe Event
     
         switch(event.type){
@@ -26,6 +57,7 @@ export async function POST(req: NextRequest){
                 const paymentIntent = event.data.object as Stripe.PaymentIntent & {
                     charges: Stripe.ApiList<Stripe.Charge>;
                 };
+                console.log('paymentIntent', paymentIntent)
                 const {id, amount, created, customer, charges, status, payment_method_types} = paymentIntent
 
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
@@ -36,14 +68,14 @@ export async function POST(req: NextRequest){
                     .single()
 
                 if (accountError) {
-                    return NextResponse.json({ error: 'Database error', details: accountError }, { status: 500 });
+                    return res.status(500).json({ error: 'Database error', details: accountError });
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
                 console.log('transactionDBError', transactionDBError)
 
                 if (transactionExists) {
-                    return NextResponse.json({message: 'Duplicate transaction', status: 200})
+                    return res.status(200).json({message: 'Duplicate transaction'})
                 }
 
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
@@ -70,13 +102,13 @@ export async function POST(req: NextRequest){
 
                 if (transactionError) {
                     console.error('Insert error:', transactionError);
-                    return NextResponse.json({ error: 'Transaction insert failed' }, { status: 500 });
+                    return res.status(500).json({ error: 'Transaction insert failed' });
                 }
 
                 const {data: transactions, error: fetchTransactions} = await supabase.from('transactions').select().eq('customer_id', customer)
 
                 if(fetchTransactions) {
-                    return NextResponse.json({error: 'Error retrieving transactions from database', status: 500})
+                    return res.status(500).json({error: 'Error retrieving transactions from database'})
                 }
                 
                 const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/predict-fraud`, {
@@ -124,11 +156,10 @@ export async function POST(req: NextRequest){
 
         console.error("Webhook signature verification failed", error)
 
-        return NextResponse.json({message:"Webhook error"},{
-            status: 400 })
+        return res.status(400).json({message:"Webhook error"})
 
     }
 
 
-    return NextResponse.json({received: true, message:"Success"})
+    return res.status(200).json({received: true, message:"Success"})
 }

@@ -19,7 +19,8 @@ export default function UserLayout({children}: {children: React.ReactNode}) {
             if(!result.user) {
                 router.replace('/login');
             }               
-            setConnectedAccount(result.connectedAccount.account_id)
+            setConnectedAccount(result.connectedAccount?.account_id)
+            
         }
         getUser()
     }, [router])
