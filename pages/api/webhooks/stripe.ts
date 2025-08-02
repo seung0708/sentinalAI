@@ -74,7 +74,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
-                //console.log('transactionDBError', transactionDBError)
+                console.log('transactionDBError', transactionDBError)
 
                 if (transactionExists) {
                     return res.status(200).json({message: 'Duplicate transaction'})
