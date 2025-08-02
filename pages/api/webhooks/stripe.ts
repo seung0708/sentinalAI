@@ -79,6 +79,25 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 if (transactionExists) {
                     return res.status(200).json({message: 'Duplicate transaction'})
                 }
+
+                const customersList = await stripe?.customers.list({
+                    stripeAccount: accountIdExistsInDb?.account_id
+                })
+
+                console.log('customersList', customersList)
+        
+                const customerFromStripe = customersList?.data.filter(customer => 
+                    customer.name == billing_details?.name &&
+                    customer.email == billing_details?.email &&
+                    customer.phone == billing_details?.phone
+                )
+                console.log('customerFromStripe',customerFromStripe)
+                // const paymentMethod = await stripe?.paymentMethods.create({
+                //     type: 'card', 
+                //     card: payment_method_types[0], 
+                //     billing_details: customerFromStripe?.billing_details
+                // })
+
                 console.log('charges data', charges?.data)
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
