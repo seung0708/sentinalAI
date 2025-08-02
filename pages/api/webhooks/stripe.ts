@@ -55,7 +55,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 };
                 console.log('paymentIntent', paymentIntent)
                 const {id, amount, created, customer, charges, status, payment_method, payment_method_types} = paymentIntent
-                let paymentIntentCustomerId = customer
+                const paymentIntentCustomerId = customer
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
                     .from('connected_accounts')
                     .select()
