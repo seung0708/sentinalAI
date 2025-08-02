@@ -27,9 +27,9 @@ def add_combined_frequency_risk(df, intervals=['5min', '10min', '30min', '1h'], 
     
     # the below line will drop the duplicates if that happens
     # for when we test using csv file
-    df = df.drop_duplicates(subset=['payment_intent_id'], keep='first')
+    #df = df.drop_duplicates(subset=['payment_intent_id'], keep='first')
     # for when we test using stripe
-    # df = df.drop_duplicates(subset=['stripe_id'], keep='first')
+    df = df.drop_duplicates(subset=['stripe_id'], keep='first')
         
     # sort by customer_id and timestamp
     df = df.sort_values(['customer_id', 'timestamp'])    
