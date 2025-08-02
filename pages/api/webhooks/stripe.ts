@@ -136,9 +136,11 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     }
                 )
                 console.log('updatePaymentMethod', updatePaymentMethod)
-                console.log('charges data', charges?.data)
-                const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
-                const {billing_details} = chargesForPI[0]
+                //console.log('charges data', charges?.data)
+                //const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
+                //const {billing_details} = chargesForPI[0]
+
+                const {billing_details} = updatePaymentMethod
 
                const { error: transactionError } = await supabase
                 .from('transactions')
