@@ -43,7 +43,8 @@ def predict_risk(X, model):
             address_proba[idx, 2] >= 0.60 or
             (X['combined_frequency_risk'].iloc[idx] >= 0.80 and X['amount_risk_score'].iloc[idx] > 0.80) or
             X['fake_component_count'].iloc[idx] >= 3 or
-            X['fake_address_score'].iloc[idx] >= 0.95):
+            X['fake_address_score'].iloc[idx] >= 0.95 or
+            X['combined_frequency_risk'].iloc[idx] >= 0.70):
             high_risk[idx] = True
         # Medium risk conditions
         elif ((freq_proba[idx, 1] >= 0.50 and X['combined_frequency_risk'].iloc[idx] >= 0.30) or
