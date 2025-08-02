@@ -94,3 +94,59 @@ export const createPaymentIntent = async (accountId: string) => {
         console.error("Error creating payment Intent", error)
     }
 }
+
+customersList {
+  object: 'list',
+  data: [
+    {
+      id: 'cus_SnJoNRxTUimwr4',
+      object: 'customer',
+      address: [Object],
+      balance: 0,
+      created: 1754155496,
+      currency: 'usd',
+      default_source: null,
+      delinquent: false,
+      description: null,
+      discount: null,
+      email: 'aisha.thompson@example.com',
+      invoice_prefix: 'IR51TNBH',
+      invoice_settings: [Object],
+      livemode: false,
+      metadata: {},
+      name: 'Aisha Thompson',
+      next_invoice_sequence: 1,
+      phone: '+15553219876',
+      preferred_locales: [],
+      shipping: null,
+      tax_exempt: 'exempt',
+      test_clock: null
+    },
+    {
+      id: 'cus_SnJ4ZA5k8CR1YX',
+      object: 'customer',
+      address: [Object],
+      balance: 0,
+      created: 1754152731,
+      currency: 'usd',
+      default_source: null,
+      delinquent: false,
+      description: null,
+      discount: null,
+      email: 'jenny.rosen@example.com',
+      invoice_prefix: 'ZD652TCI',
+      invoice_settings: [Object],
+      livemode: false,
+      metadata: {},
+      name: 'Jenny Rosen',
+      next_invoice_sequence: 1,
+      phone: '+14085553029',
+      preferred_locales: [],
+      shipping: null,
+      tax_exempt: 'exempt',
+      test_clock: null
+    }
+  ],
+  has_more: false,
+  url: '/v1/customers'
+}

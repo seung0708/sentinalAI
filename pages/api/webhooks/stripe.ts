@@ -19,7 +19,6 @@ export const config = {
   }
  
 export default async function handler (req: NextApiRequest, res: NextApiResponse){
-
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ error: 'Method not allowed' });
@@ -31,10 +30,6 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
     const sig = req.headers['stripe-signature'] as string
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
-    console.log('rawBody', rawBody)
-    console.log('sig', sig)
-    console.log('endpointSecret', endpointSecret)
-
     if (!stripe) {
         return res.status(500).json({ error: "Stripe not initialized" });
     }
@@ -43,7 +38,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
 
     try {
         try {
-            event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+            event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
             console.log('Received event type:', event, event.type);
             console.log('Connected account id:', event.account);
         } catch (err) {
@@ -59,8 +54,8 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     charges: Stripe.ApiList<Stripe.Charge>;
                 };
                 console.log('paymentIntent', paymentIntent)
-                const {id, amount, created, customer, charges, status, payment_method_types} = paymentIntent
-
+                const {id, amount, created, customer, charges, status, payment_method, payment_method_types} = paymentIntent
+                let paymentIntentCustomerId = customer
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
                     .from('connected_accounts')
                     .select()
@@ -87,9 +82,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 console.log('customersList', customersList)
         
                 const customerFromStripe = customersList?.data.filter(customer => 
-                    customer.name == billing_details?.name &&
-                    customer.email == billing_details?.email &&
-                    customer.phone == billing_details?.phone
+                    customer.id === paymentIntentCustomerId
                 )
                 console.log('customerFromStripe',customerFromStripe)
                 // const paymentMethod = await stripe?.paymentMethods.create({
@@ -97,6 +90,13 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 //     card: payment_method_types[0], 
                 //     billing_details: customerFromStripe?.billing_details
                 // })
+
+                const paymentMethod = await stripe.customers.retrievePaymentMethod(
+                    customerFromStripe[0]?.id,
+                    payment_method as string
+                );
+
+                console.log('paymentMethod', paymentMethod)
 
                 console.log('charges data', charges?.data)
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
