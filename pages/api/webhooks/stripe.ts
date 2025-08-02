@@ -104,7 +104,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 console.log('paymentMethod', paymentMethod)
 
                 if(!paymentMethod.customer) {
-                    await stripe.paymentMethods.attach(
+                    const attachCustomer = await stripe.paymentMethods.attach(
                         paymentMethod.id, 
                         {
                             customer: customerFromStripe[0]?.id
@@ -113,6 +113,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                             stripeAccount: accountIdExistsInDb?.account_id
                         }
                     )
+                    console.log('attachCustomer', attachCustomer)
                 }
 
                 const updatePaymentMethod = await stripe.paymentMethods.update(
