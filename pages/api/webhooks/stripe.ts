@@ -74,12 +74,12 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
-                console.log('transactionDBError', transactionDBError)
+                //console.log('transactionDBError', transactionDBError)
 
                 if (transactionExists) {
                     return res.status(200).json({message: 'Duplicate transaction'})
                 }
-
+                console.log('charges data', charges?.data)
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
 
@@ -107,9 +107,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     return res.status(500).json({ error: 'Transaction insert failed' });
                 }
 
-                const {data: transactions, error: fetchTransactions} = await supabase.from('transactions').select().eq('customer_id', customer)
-
-                if(fetchTransactions) {
+                const {data: transactions, error: fetchTransactionsError} = await supabase.from('transactions').select().eq('customer_id', customer)
+                console.log('fetchTransactionsError', fetchTransactionsError)
+                if(fetchTransactionsError) {
                     return res.status(500).json({error: 'Error retrieving transactions from database'})
                 }
                 
@@ -122,7 +122,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 })
 
                 const result = await data.json()
-                //console.log(result)
+                console.log('result', result)
 
                 const {data: updateTransaction, error: updateTransactionError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
@@ -133,9 +133,8 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 .order('timestamp', { ascending: false }) 
                 .limit(1)
                 .select()
-                console.log('update transaction error', updateTransactionError)
 
-
+                console.log('updateTransactionError', updateTransactionError)
 
                 const indexTransaction = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
                     method: 'POST', 
@@ -145,7 +144,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     body: JSON.stringify(updateTransaction?.[0])
                 })
 
-                console.log(indexTransaction)
+                console.log('updateTransactionError', indexTransaction)
                 
                 break
     
