@@ -66,8 +66,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     .eq('account_id', event.account)
                     .limit(1)
                     .single()
-
+                
                 if (accountError) {
+                    console.log('account Error webhook', accountError)
                     return res.status(500).json({ error: 'Database error', details: accountError });
                 }
 
