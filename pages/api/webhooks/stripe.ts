@@ -5,6 +5,10 @@ import {getStripe} from '@/app/api/lib/stripe'
 import { buffer } from 'micro';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
+/**
+ 
+ */
+
 function createClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -92,7 +96,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 // })
 
                 const paymentMethod = await stripe.paymentMethods.retrieve(
-                    payment_method as string
+                    payment_method as string, {
+                        stripeAccount: accountIdExistsInDb?.account_id
+                    }
                 );
 
                 console.log('paymentMethod', paymentMethod)
@@ -101,6 +107,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     paymentMethod.id, 
                     {
                         customer: customerFromStripe[0]?.id
+                    }, 
+                    {
+                        stripeAccount: accountIdExistsInDb?.account_id
                     }
                 )
                 console.log('attachPaymentMethod', attachPaymentMethod)
