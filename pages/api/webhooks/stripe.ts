@@ -58,7 +58,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     charges: Stripe.ApiList<Stripe.Charge>;
                 };
                 console.log('paymentIntent', paymentIntent)
-                const {id, amount, created, customer, charges, status, payment_method, payment_method_types} = paymentIntent
+                const {id, amount, created, customer, status, payment_method, payment_method_types} = paymentIntent
                 const paymentIntentCustomerId = customer
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
                     .from('connected_accounts')
