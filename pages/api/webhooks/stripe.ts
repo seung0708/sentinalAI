@@ -103,16 +103,39 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
 
                 console.log('paymentMethod', paymentMethod)
 
-                const attachPaymentMethod = await stripe.paymentMethods.attach(
+                if(!paymentMethod.customer) {
+                    await stripe.paymentMethods.attach(
+                        paymentMethod.id, 
+                        {
+                            customer: customerFromStripe[0]?.id
+                        }, 
+                        {
+                            stripeAccount: accountIdExistsInDb?.account_id
+                        }
+                    )
+                }
+
+                const updatePaymentMethod = await stripe.paymentMethods.update(
                     paymentMethod.id, 
                     {
-                        customer: customerFromStripe[0]?.id
+                        billing_details: {
+                            address: {
+                                city: customerFromStripe[0]?.address?.city as string, 
+                                country: customerFromStripe[0]?.address?.country as string, 
+                                line1: customerFromStripe[0]?.address?.line1 as string, 
+                                postal_code: customerFromStripe[0]?.address?.postal_code as string, 
+                                state: customerFromStripe[0]?.address?.state as string
+                            }, 
+                            email: customerFromStripe[0]?.email, 
+                            name: customerFromStripe[0]?.name, 
+                            phone: customerFromStripe[0]?.phone
+                        }
                     }, 
                     {
                         stripeAccount: accountIdExistsInDb?.account_id
                     }
                 )
-                console.log('attachPaymentMethod', attachPaymentMethod)
+                console.log('updatePaymentMethod', updatePaymentMethod)
                 console.log('charges data', charges?.data)
                 const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 const {billing_details} = chargesForPI[0]
