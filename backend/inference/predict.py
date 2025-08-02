@@ -62,6 +62,8 @@ def predict_risk(X, model):
 
     # adjust probabilities based on rules
     final_proba = combined_proba.copy()
+    medium_risk = np.array(medium_risk)
+    high_risk = np.array(high_risk)      
     final_proba[high_risk, 2] = np.maximum(0.90, final_proba[high_risk, 2])
     final_proba[medium_risk & ~high_risk, 1] = np.maximum(0.75, final_proba[medium_risk & ~high_risk, 1])  # Medium risk
     
