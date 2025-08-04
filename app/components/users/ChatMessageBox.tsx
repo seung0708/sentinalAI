@@ -23,16 +23,18 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
     console.log('ChatBox', connectedAccount)
     console.log('isChatOpen', isChatOpen)
 
-    useEffect(() => {
-        if (isChatOpen) {   
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
-            .then(() => {
-              console.log('Server pinged to wake up');
-            })
-            .catch(err => {
-              console.error('Ping failed:', err);
-            });
+    useEffect( () => {
+        async function pingServer() {
+            if (isChatOpen) {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
+              if(!res.ok){
+                console.log('Failed to ping server')
+              }
+              const data = await res.json()
+              console.log(data)
+            }
         }
+        pingServer()
       }, [isChatOpen]);
 
     useEffect(() => {
