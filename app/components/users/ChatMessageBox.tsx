@@ -105,7 +105,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
             const data = await res.json();
 
             setMessage(prev => {
-                let updated = [...prev];
+                const updated = [...prev];
                 if (thinkingIndexRef.current !== -1) {
                   updated.splice(thinkingIndexRef.current, 1);
                   thinkingIndexRef.current = -1;
