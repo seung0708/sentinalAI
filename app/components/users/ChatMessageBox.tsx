@@ -19,17 +19,12 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
     const [ hasShownSlow, setHasShownSlow] = useState(false)
     const [hasShownWaking, setHasShownWaking] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const thinkingIndexRef = useRef<number>(0);
-    console.log('ChatBox', connectedAccount)
-    console.log('isChatOpen', isChatOpen)
+    const thinkingIndexRef = useRef<number>(-1);
 
     useEffect( () => {
         async function pingServer() {
             if (isChatOpen) {
               const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
-              if(!res.ok){
-                console.log('Failed to ping server')
-              }
               const data = await res.json()
               console.log(data)
             }
@@ -48,7 +43,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
     }, [isRunning, seconds]);
 
     useEffect(() => {
-        if (isRunning && thinkingIndexRef.current !== null) {
+        if (isRunning && thinkingIndexRef.current !== -1) {
             if (seconds === 6 && !hasShownSlow) {
                 setMessage(prev => {
                     const updated = [...prev];
@@ -75,55 +70,47 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
 
     const handleSend = async () => {
         if (!input.trim()) return;
-
-        setLoading(true)
-        const userMsg = { sender: 'user', text: input};
-        setMessage(prev => [...prev, userMsg]);
-
-        const thinkingMsg = {sender: 'bot', text: 'Thinking...'};
+    
+        setLoading(true);
+        setInput('');
+    
+        const userMsg = { sender: 'user', text: input };
+        const thinkingMsg = { sender: 'bot', text: 'Thinking...' };
+    
         setMessage(prev => {
-            thinkingIndexRef.current = prev.length;
-            return [...prev, thinkingMsg];
+            const newMessages = [...prev, userMsg];
+            thinkingIndexRef.current = newMessages.length; 
+            return [...newMessages, thinkingMsg];
         });
-
+    
         setIsRunning(true);
         setSeconds(0);
         setHasShownSlow(false);
         setHasShownWaking(false);
-        setInput('');
-
+    
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
-                method:'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query: input, account_id: connectedAccount}),
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: input, account_id: connectedAccount }),
             });
+        
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        
             const data = await res.json();
-            console.log(data)
-            if (thinkingIndexRef.current !== null) {
-                setMessage(prev => {
-                  const updated = [...prev];
-                  updated[thinkingIndexRef.current].text = data.response || 'Oops! Something went wrong';
-                  return updated;
-                });
-            }
+            console.log('API data:', data);
+        
+            setMessage(prev => [...prev, { sender: 'bot', text: data.response || 'Oops! Something went wrong' }]);
+    
         } catch (err) {
-            console.log(err);
-            if (thinkingIndexRef.current !== null) {
-                setMessage(prev => {
-                  const updated = [...prev];
-                  updated[thinkingIndexRef.current].text = 'Oops! Something went wrong';
-                  return updated;
-                });
-            }
-
+            console.error('Fetch error:', err);
+            setMessage(prev => [...prev, { sender: 'bot', text: 'Oops! Something went wrong' }]);
         } finally {
             setIsRunning(false);
-            thinkingIndexRef.current = 0;
+            thinkingIndexRef.current = -1;
             setLoading(false);
         }
-
-    }
+    };
 
     return (
 

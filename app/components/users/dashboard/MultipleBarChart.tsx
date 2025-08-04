@@ -38,9 +38,6 @@ import {ChartEntry} from '@/app/(users)/dashboard/page'
   }
 
 export const MultipleBarChart: React.FC<ChartProps> = ({ timeRange, onRangeChange, chartData}) => {
-    console.log('chartData', chartData)
-    console.log('timeRange', timeRange)
-    console.log('onRangeChange', onRangeChange)
     return (
         <Card className="@container/cad">
             <CardHeader className="relative">
