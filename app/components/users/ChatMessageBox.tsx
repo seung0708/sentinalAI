@@ -26,7 +26,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
             if (isChatOpen) {
               const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
               const data = await res.json()
-              console.log(data)
+              console.log(data.message)
             }
         }
         pingServer()
@@ -42,26 +42,27 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
         return () => clearInterval(timer);
     }, [isRunning, seconds]);
 
-    useEffect(() => {
-        if (isRunning && thinkingIndexRef.current !== -1) {
-            if (seconds === 6 && !hasShownSlow) {
-                setMessage(prev => {
-                    const updated = [...prev];
-                    updated[thinkingIndexRef.current].text = 'Taking longer than expected...';
-                    return updated;
-                });
-                setHasShownSlow(true);
-            }
-            if (seconds === 11 && !hasShownWaking) {
-                setMessage(prev => {
-                    const updated = [...prev];
-                    updated[thinkingIndexRef.current].text = 'AI might still be waking up...';
-                    return updated;
-                });
-                setHasShownWaking(true);
-            }
-        }
-    }, [seconds, isRunning, hasShownSlow, hasShownWaking]);
+    //need to figure out how long it takes for the ai to respond before implementing this
+    // useEffect(() => {
+    //     if (isRunning && thinkingIndexRef.current !== -1) {
+    //         if (seconds === 6 && !hasShownSlow) {
+    //             setMessage(prev => {
+    //                 const updated = [...prev];
+    //                 updated[thinkingIndexRef.current].text = 'Taking longer than expected...';
+    //                 return updated;
+    //             });
+    //             setHasShownSlow(true);
+    //         }
+    //         if (seconds === 11 && !hasShownWaking) {
+    //             setMessage(prev => {
+    //                 const updated = [...prev];
+    //                 updated[thinkingIndexRef.current].text = 'AI might still be waking up...';
+    //                 return updated;
+    //             });
+    //             setHasShownWaking(true);
+    //         }
+    //     }
+    // }, [seconds, isRunning, hasShownSlow, hasShownWaking]);
 
 
     useEffect(() => {
