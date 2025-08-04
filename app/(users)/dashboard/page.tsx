@@ -37,11 +37,18 @@ export type Top5RiskyCustomers = {
     predicted_risk: string
 }
 
+/**
+ * The user dashboard page, showing a summary of their transactions, a chart
+ * of their transaction amounts over time, and a table of their top 5 most
+ * risky customers.
+ * 
+ * @returns The dashboard page content.
+ */
 export default function Dashboard() {
     const [summary, setSummary] = useState<Summary>({total: 0, low: 0, med: 0, high: 0})
     const [chartData, setChartData] = useState<ChartEntry[]>([])
     const [topRisky, setTopRisky] = useState<Top5RiskyCustomers[]>([])
-    const [timeRange, setTimeRange] = useState('7d')
+    const timeRange = '7d'
     
     useEffect(() => {
         const getSummaries = async () => {
@@ -54,7 +61,7 @@ export default function Dashboard() {
         }
 
         getSummaries()
-    }, [timeRange])    
+    }, [])    
 
     return (
         <div className="flex flex-1 flex-col">
