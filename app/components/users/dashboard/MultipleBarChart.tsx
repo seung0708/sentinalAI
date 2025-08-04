@@ -32,12 +32,10 @@ const chartConfig = {
 import {ChartEntry} from '@/app/(users)/dashboard/page'
 
   interface ChartProps {
-    timeRange: string, 
-    onRangeChange: (range: string) => void,
     chartData: ChartEntry[]
   }
 
-export const MultipleBarChart: React.FC<ChartProps> = ({ timeRange, onRangeChange, chartData}) => {
+export const MultipleBarChart: React.FC<ChartProps> = ({chartData}) => {
     return (
         <Card className="@container/cad">
             <CardHeader className="relative">
