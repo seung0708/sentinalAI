@@ -17,7 +17,7 @@ export const createPaymentIntent = async (accountId: string) => {
             customer.email == billing_details?.email &&
             customer.phone == billing_details?.phone
         )
-        console.log(testTransactionCustomer)
+        
         if (!testTransactionCustomer?.[0]?.id) {
             const createCustomer = await stripe?.customers.create({
                 name: billing_details?.name,

@@ -9,12 +9,12 @@ export async function POST() {
     const stripe = getStripe()
     const {data: {user}, error} = await supabase.auth.getUser();
 
-    console.log('user error', error)
+    if (error) console.error(error)
 
     const {data: connectedAccount, error: accountIdError} = await supabase.from("connected_accounts").select("*").eq("user_id", user?.id).single();
     accountId = connectedAccount?.account_id; 
 
-    console.log('accountIdError', accountIdError)
+    if (accountIdError) console.error(accountIdError)
 
     try {
         
@@ -31,11 +31,9 @@ export async function POST() {
                 account_id: accountId
             })
 
-            console.log('insert error', error)
+            if (error) console.error(error)
 
         }
-
-        console.log('accountId', accountId)
 
         const accountLink = await stripe?.accountLinks.create({
             account: accountId, 
@@ -43,8 +41,6 @@ export async function POST() {
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/integrations`,
             type: "account_onboarding"
         })
-
-        console.log(accountLink)
 
         return NextResponse.json({
             accountLink

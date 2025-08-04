@@ -23,7 +23,6 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export default function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
-   console.log('TableCellView', item)
     const isMobile = useIsMobile()
     return (
       <Sheet>

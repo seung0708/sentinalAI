@@ -3,11 +3,11 @@ import { getStripe } from "../../lib/stripe";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    console.log('Getting request')
     const supabase = await createClient(); 
     const stripe = getStripe()
     const {data: {user}, error: userError} = await supabase.auth.getUser(); 
-    console.log('user error api/stripe/status', userError)
+
+    if (userError) console.error(userError)
 
     if (!user) {
         return NextResponse.json({

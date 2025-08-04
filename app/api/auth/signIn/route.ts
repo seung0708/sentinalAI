@@ -14,8 +14,7 @@ export async function POST(req: NextRequest){
         });
         if(dbError?.status === 400){
             if (dbError.code === 'email_not_confirmed') {
-                const {data: userData, error: userError} = await supabase.from('users').select().eq('email', email).single();
-                console.log(userData)
+                const { error: userError} = await supabase.from('users').select().eq('email', email).single();
                 if(userError){
                     return NextResponse.json({
                         error: "User account not found. Please sign up.",

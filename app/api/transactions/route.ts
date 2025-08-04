@@ -26,7 +26,7 @@ export async function GET(request: Request){
     const supabase = await createClient()
     const {data: {user}, error: fechUserError} = await supabase.auth.getUser()
     if(!user) redirect('/signin') 
-    console.log('fetch user error: ', fechUserError) 
+    if (fechUserError) console.error(fechUserError)
     const {data: connectedAccount, error: fetchConnectAccError} = await supabase.from('connected_accounts').select('account_id').eq('user_id', user?.id).single()
 
     if (!connectedAccount && fetchConnectAccError) {

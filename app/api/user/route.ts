@@ -18,8 +18,6 @@ export async function GET(){
         console.error(fetchConnectAccError)
     }
 
-    console.log('connected account', connectedAccount)
-
     if (!connectedAccount) {
         return NextResponse.json({
             user,

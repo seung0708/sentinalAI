@@ -10,8 +10,6 @@ export async function POST(req: NextRequest){
         const body = await req.json();
     
         const {company, email, password} = body;
-
-        console.log(company, email, password);
     
         const {data: authData, error: dbError} = await supabase.auth.signUp({
             email: email,

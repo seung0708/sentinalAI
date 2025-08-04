@@ -10,12 +10,10 @@ export async function POST(req: NextRequest){
 
         const {email, password } = body;
 
-        const { data: updateUserData, error: updateUserError } = await supabase.auth.updateUser({
+        const { error: updateUserError } = await supabase.auth.updateUser({
             email: email,
             password: password
         })
-
-        console.log("Update user data:", updateUserData)
 
         if(updateUserError){
             return NextResponse.json({
@@ -29,7 +27,7 @@ export async function POST(req: NextRequest){
 
     } catch (error) {
 
-        console.error(error)
+        if (error) console.error(error)
         return NextResponse.json({err: "Server error", message: "Failed to update user"},
             {
                 status: 500,

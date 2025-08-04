@@ -10,10 +10,6 @@ export async function POST(req: NextRequest){
     const sig = req.headers.get('stripe-signature') as string
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
-    console.log('rawBody', rawBody)
-    console.log('sig', sig)
-    console.log('endpointSecret', endpointSecret)
-
     if (!stripe) {
         return NextResponse.json({ error: "Stripe not initialized" }, { status: 500 });
     }
@@ -44,7 +40,9 @@ export async function POST(req: NextRequest){
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
-                console.log('transactionDBError', transactionDBError)
+                if (transactionDBError) console.error(transactionDBError)
+
+
 
                 if (transactionExists) {
                     return NextResponse.json({message: 'Duplicate transaction', status: 200})
@@ -92,7 +90,7 @@ export async function POST(req: NextRequest){
                 })
 
                 const result = await data.json()
-                //console.log(result)
+                
 
                 const {data: updateTransaction, error: updateTransactionError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
@@ -103,11 +101,11 @@ export async function POST(req: NextRequest){
                 .order('timestamp', { ascending: false }) 
                 .limit(1)
                 .select()
-                console.log('update transaction error', updateTransactionError)
+                if (updateTransactionError) console.error(updateTransactionError)
 
 
 
-                const indexTransaction = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json'
@@ -115,8 +113,6 @@ export async function POST(req: NextRequest){
                     body: JSON.stringify(updateTransaction?.[0])
                 })
 
-                console.log(indexTransaction)
-                
                 break
     
             // adding more cases - need to think about other event cases

@@ -27,12 +27,12 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ error: 'Method not allowed' });
     }
-
     const supabase = await createClient();
     const stripe = getStripe()
     const rawBody = (await buffer(req)).toString()
     const sig = req.headers['stripe-signature'] as string
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+    let updatePaymentMethod
 
     if (!stripe) {
         return res.status(500).json({ error: "Stripe not initialized" });
@@ -55,7 +55,6 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 const paymentIntent = event.data.object as Stripe.PaymentIntent & {
                     charges: Stripe.ApiList<Stripe.Charge>;
                 };
-                console.log('paymentIntent', paymentIntent)
                 const {id, amount, created, customer, status, payment_method, payment_method_types} = paymentIntent
                 const paymentIntentCustomerId = customer
                 const {data: accountIdExistsInDb, error: accountError} = await supabase
@@ -71,7 +70,10 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 }
 
                 const {data: transactionExists, error: transactionDBError} = await supabase.from('transactions').select().eq('stripe_id', id).single()
-                console.log('transactionDBError', transactionDBError)
+
+                if (transactionDBError) {
+                    console.log('transactionDBError', transactionDBError)
+                }
 
                 if (transactionExists) {
                     return res.status(200).json({message: 'Duplicate transaction'})
@@ -81,12 +83,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     stripeAccount: accountIdExistsInDb?.account_id
                 })
 
-                console.log('customersList', customersList)
-        
                 const customerFromStripe = customersList?.data.filter(customer => 
                     customer.id === paymentIntentCustomerId
                 )
-                console.log('customerFromStripe',customerFromStripe)
                 // const paymentMethod = await stripe?.paymentMethods.create({
                 //     type: 'card', 
                 //     card: payment_method_types[0], 
@@ -99,10 +98,8 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                     }
                 );
 
-                console.log('paymentMethod', paymentMethod)
-
                 if(!paymentMethod.customer) {
-                    const attachCustomer = await stripe.paymentMethods.attach(
+                    await stripe.paymentMethods.attach(
                         paymentMethod.id, 
                         {
                             customer: customerFromStripe[0]?.id
@@ -111,37 +108,35 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                             stripeAccount: accountIdExistsInDb?.account_id
                         }
                     )
-                    console.log('attachCustomer', attachCustomer)
-                }
-
-                const updatePaymentMethod = await stripe.paymentMethods.update(
-                    paymentMethod.id, 
-                    {
-                        billing_details: {
-                            address: {
-                                city: customerFromStripe[0]?.address?.city as string, 
-                                country: customerFromStripe[0]?.address?.country as string, 
-                                line1: customerFromStripe[0]?.address?.line1 as string, 
-                                postal_code: customerFromStripe[0]?.address?.postal_code as string, 
-                                state: customerFromStripe[0]?.address?.state as string
-                            }, 
-                            email: customerFromStripe[0]?.email, 
-                            name: customerFromStripe[0]?.name, 
-                            phone: customerFromStripe[0]?.phone
+                } else {
+                    updatePaymentMethod = await stripe.paymentMethods.update(
+                        paymentMethod.id, 
+                        {
+                            billing_details: {
+                                address: {
+                                    city: customerFromStripe[0]?.address?.city as string, 
+                                    country: customerFromStripe[0]?.address?.country as string, 
+                                    line1: customerFromStripe[0]?.address?.line1 as string, 
+                                    postal_code: customerFromStripe[0]?.address?.postal_code as string, 
+                                    state: customerFromStripe[0]?.address?.state as string
+                                }, 
+                                email: customerFromStripe[0]?.email, 
+                                name: customerFromStripe[0]?.name, 
+                                phone: customerFromStripe[0]?.phone
+                            }
+                        }, 
+                        {
+                            stripeAccount: accountIdExistsInDb?.account_id
                         }
-                    }, 
-                    {
-                        stripeAccount: accountIdExistsInDb?.account_id
-                    }
-                )
-                console.log('updatePaymentMethod', updatePaymentMethod)
-                //console.log('charges data', charges?.data)
+                    )
+                }
+                
                 //const chargesForPI = charges.data.filter((charge: Stripe.Charge) => charge.payment_intent == id)
                 //const {billing_details} = chargesForPI[0]
 
-                const {billing_details} = updatePaymentMethod
+                const { billing_details } = updatePaymentMethod as Stripe.Response<Stripe.PaymentMethod>;
 
-               const { error: transactionError } = await supabase
+                const { error: transactionError } = await supabase
                 .from('transactions')
                 .insert({
                     stripe_id: id,
@@ -166,10 +161,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 }
 
                 const {data: transactions, error: fetchTransactionsError} = await supabase.from('transactions').select().eq('customer_id', customer)
-                console.log('transactions', transactions)
-                console.log('fetchTransactionsError', fetchTransactionsError)
+                
                 if(fetchTransactionsError) {
-                    return res.status(500).json({error: 'Error retrieving transactions from database'})
+                    console.error('Error retrieving transactions from database', fetchTransactionsError)
                 }
                 
                 const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/predict-fraud`, {
@@ -181,8 +175,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 })
 
                 const result = await data.json()
-                console.log('result', result)
-
+                
                 const {data: updateTransaction, error: updateTransactionError} = await supabase.from('transactions').update({
                     predicted_risk: result.predicted_risk, 
                     probabilities: result.probabilities,
@@ -193,17 +186,17 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 .limit(1)
                 .select()
 
-                console.log('updateTransactionError', updateTransactionError)
+                if(updateTransactionError) {
+                    console.error('Error updating transaction', updateTransactionError)
+                }
 
-                const indexTransaction = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/index-transaction`, {
                     method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(updateTransaction?.[0])
                 })
-
-                console.log('updateTransactionError', indexTransaction)
                 
                 break
     

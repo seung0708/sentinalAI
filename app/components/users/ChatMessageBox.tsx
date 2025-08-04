@@ -24,9 +24,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
     useEffect( () => {
         async function pingServer() {
             if (isChatOpen) {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
-              const data = await res.json()
-              console.log(data.message)
+              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`)
             }
         }
         pingServer()
@@ -34,35 +32,52 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
-        if (isRunning && seconds > 0) {
+        if (isRunning) {
             timer = setInterval(() => {
                 setSeconds(prev => prev + 1);
             }, 1000);
         }
         return () => clearInterval(timer);
-    }, [isRunning, seconds]);
+    }, [isRunning]);
 
-    //need to figure out how long it takes for the ai to respond before implementing this
-    // useEffect(() => {
-    //     if (isRunning && thinkingIndexRef.current !== -1) {
-    //         if (seconds === 6 && !hasShownSlow) {
-    //             setMessage(prev => {
-    //                 const updated = [...prev];
-    //                 updated[thinkingIndexRef.current].text = 'Taking longer than expected...';
-    //                 return updated;
-    //             });
-    //             setHasShownSlow(true);
-    //         }
-    //         if (seconds === 11 && !hasShownWaking) {
-    //             setMessage(prev => {
-    //                 const updated = [...prev];
-    //                 updated[thinkingIndexRef.current].text = 'AI might still be waking up...';
-    //                 return updated;
-    //             });
-    //             setHasShownWaking(true);
-    //         }
-    //     }
-    // }, [seconds, isRunning, hasShownSlow, hasShownWaking]);
+    useEffect(() => {
+        if (isRunning && thinkingIndexRef.current === -1) {
+            if (seconds === 6 && !hasShownSlow) {
+                setMessage(prev => {
+                  const newMessages = [...prev, { sender: 'bot', text: 'Taking longer than expected...' }];
+                  thinkingIndexRef.current = newMessages.length - 1;
+                  return newMessages;
+                });
+                setHasShownSlow(true);
+              }
+              if (seconds === 11 && !hasShownWaking && thinkingIndexRef.current !== -1) {
+                setMessage(prev => {
+                  const updated = [...prev];
+                  updated[thinkingIndexRef.current].text = 'AI might still be waking up...';
+                  return updated;
+                });
+                setHasShownWaking(true);
+              }
+        }
+    }, [seconds, isRunning, hasShownSlow, hasShownWaking]);
+
+    useEffect(() => {
+        const hasUserMsg = messages.some(msg => msg.sender === 'user');
+        const hasBotMsg = messages.some(msg => msg.sender === 'bot');
+        if (hasUserMsg && !hasBotMsg && !isRunning) {
+            setIsRunning(true);
+            setSeconds(0);
+            setHasShownSlow(false);
+            setHasShownWaking(false);
+            thinkingIndexRef.current = messages.length;
+        }
+    }, [messages, isRunning]);
+
+    useEffect(() => {
+        if (isRunning && messages.some(msg => msg.sender === 'bot')) {
+            setIsRunning(false);
+        }
+    }, [messages, isRunning]);
 
 
     useEffect(() => {
@@ -73,21 +88,10 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
         if (!input.trim()) return;
     
         setLoading(true);
-        setInput('');
-    
+
         const userMsg = { sender: 'user', text: input };
-        const thinkingMsg = { sender: 'bot', text: 'Thinking...' };
-    
-        setMessage(prev => {
-            const newMessages = [...prev, userMsg];
-            thinkingIndexRef.current = newMessages.length; 
-            return [...newMessages, thinkingMsg];
-        });
-    
-        setIsRunning(true);
-        setSeconds(0);
-        setHasShownSlow(false);
-        setHasShownWaking(false);
+        setMessage(prev => [...prev, userMsg]);
+        setInput('');
     
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
@@ -99,10 +103,16 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
             if (!res.ok) throw new Error(`Server error: ${res.status}`);
         
             const data = await res.json();
-            console.log('API data:', data);
-        
-            setMessage(prev => [...prev, { sender: 'bot', text: data.response }]);
-    
+
+            setMessage(prev => {
+                let updated = [...prev];
+                if (thinkingIndexRef.current !== -1) {
+                  updated.splice(thinkingIndexRef.current, 1);
+                  thinkingIndexRef.current = -1;
+                }
+                return [...updated, { sender: 'bot', text: data.response }];
+            });
+
         } catch (err) {
             console.error('Fetch error:', err);
             setMessage(prev => [...prev, { sender: 'bot', text: 'Oops! Something went wrong' }]);
@@ -132,7 +142,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
                                 <h5 className="text-green-700">{msg.sender === 'user' ? 'You' : 'Bot'}</h5>
                                 <div className='grid'>
                                     <div className='items-center gap-3 inline-flex'>
-                                    <p className={`p-6 m-2 text-white bg-green-700 rounded-full`}>{msg.text}</p>
+                                    <p className={`p-6 m-2 text-white bg-green-700 rounded-xl max-w-[70vw] break-words`}>{msg.text}</p>
                                     </div>
                                 </div>
                             </div>
