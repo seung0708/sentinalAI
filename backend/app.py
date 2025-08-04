@@ -30,6 +30,10 @@ chatbot = TransactionChatBot(supabase, openai_api_key)
 
 model = joblib.load('./model/fraud_models.joblib')
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "Pong!"}), 200
+
 @app.route('/')
 @app.route('/predict-fraud', methods=['POST'])
 def predict_fraud():
