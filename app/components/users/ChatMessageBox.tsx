@@ -100,7 +100,7 @@ export default function ChatMessageBox({isChatOpen, connectedAccount}: ChatBotPr
             const data = await res.json();
             console.log('API data:', data);
         
-            setMessage(prev => [...prev, { sender: 'bot', text: data.response || 'Oops! Something went wrong' }]);
+            setMessage(prev => [...prev, { sender: 'bot', text: data.response }]);
     
         } catch (err) {
             console.error('Fetch error:', err);
