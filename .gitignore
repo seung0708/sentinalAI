@@ -58,3 +58,4 @@ __pycache__/
 *.joblib
 /backend/__pycache__
 
+tmpclaude*
